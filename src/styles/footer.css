@@ -21,7 +21,7 @@
 
 .footer-content {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
     gap: 40px;
     margin-bottom: 40px;
 }
@@ -66,6 +66,32 @@
 .footer-link:hover {
     color: var(--accent-light);
     transform: translateX(4px);
+}
+
+.social-links {
+    display: flex;
+    gap: 16px;
+    margin-top: 4px;
+}
+
+.social-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--hover-bg);
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+    border: 1px solid var(--glass-border);
+}
+
+.social-icon:hover {
+    background: var(--accent-color);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
 .footer-bottom {
