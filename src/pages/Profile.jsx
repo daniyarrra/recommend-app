@@ -41,13 +41,15 @@ const ShareIcon = () => (
 
 const Profile = () => {
     const [user, setUser] = useState(null);
-    const [savedItems, setSavedItems] = useState([]);
-    const [ratedItems, setRatedItems] = useState([]);
-    const [activeTab, setActiveTab] = useState("feed"); // 'feed' | 'watchlist' | 'ratings' | 'settings'
+    const [watchlistItems, setWatchlistItems] = useState([]);
+    const [activeTab, setActiveTab] = useState("feed");
+    const [activeFolder, setActiveFolder] = useState("all");
+    const [folderAssignItem, setFolderAssignItem] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isPublic, setIsPublic] = useState(false);
     const [avatarUrl, setAvatarUrl] = useState(null);
     const [bio, setBio] = useState("");
+    const [nickname, setNickname] = useState("");
     const [theme, setTheme] = useState(localStorage.getItem('app-theme') || 'dark');
     const navigate = useNavigate();
     const { t, language, setLanguage } = useLanguage();
@@ -59,10 +61,8 @@ const Profile = () => {
         localStorage.setItem('app-theme', newTheme);
     };
 
-    // Аналитика
     const [topGenres, setTopGenres] = useState([]);
     const [categoryCounts, setCategoryCounts] = useState({});
-
     const [followers, setFollowers] = useState([]);
     const [following, setFollowing] = useState([]);
     const [showModal, setShowModal] = useState(null);
@@ -70,55 +70,57 @@ const Profile = () => {
     useEffect(() => {
         const fetchUserData = async () => {
             const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-                navigate("/login");
-                return;
-            }
+            if (!session) { navigate("/login"); return; }
             setUser(session.user);
-
-            let sItems = [];
-            let rItems = [];
-
+            let allWatchlistItems = [];
             try {
-                // Пытаемся получить профиль
                 const { data: profileData } = await supabase
                     .from("profiles")
-                    .select("is_public, avatar_url, bio")
+                    .select("is_public, avatar_url, bio, nickname")
                     .eq("id", session.user.id)
                     .maybeSingle();
-
                 if (profileData) {
                     setIsPublic(profileData.is_public);
                     setAvatarUrl(profileData.avatar_url);
                     if (profileData.bio) setBio(profileData.bio);
+                    if (profileData.nickname) setNickname(profileData.nickname);
                 }
 
-                // Загружаем общий каталог
                 const res = await API.get("/items");
                 const allItems = res.data;
 
-                // Watchlist
+                // Watchlist с папками
                 const { data: watchlistData } = await supabase
                     .from("watchlist")
-                    .select("item_id")
+                    .select("item_id, folder")
                     .eq("user_id", session.user.id);
+
+                const { data: ratingsData } = await supabase
+                    .from("ratings")
+                    .select("item_id, rating")
+                    .eq("user_id", session.user.id);
+                
+                const ratingsMap = {};
+                if (ratingsData) {
+                    ratingsData.forEach(r => { ratingsMap[r.item_id] = r.rating; });
+                }
+
+                // Карта папок
+                const folderMap = {};
+                if (watchlistData) {
+                    watchlistData.forEach(w => { folderMap[w.item_id] = w.folder || null; });
+                }
                 
                 if (watchlistData) {
                     const savedIds = watchlistData.map(w => w.item_id);
-                    sItems = allItems.filter(item => savedIds.includes(item.id));
-                    setSavedItems(sItems);
-                }
-
-                // Ratings (Оценки)
-                const { data: ratingsData } = await supabase
-                    .from("ratings")
-                    .select("item_id")
-                    .eq("user_id", session.user.id);
-                
-                if (ratingsData) {
-                    const ratedIds = ratingsData.map(r => r.item_id);
-                    rItems = allItems.filter(item => ratedIds.includes(item.id));
-                    setRatedItems(rItems);
+                    allWatchlistItems = allItems
+                        .filter(item => savedIds.includes(item.id))
+                        .map(item => ({
+                            ...item,
+                            userRating: ratingsMap[item.id] || 0,
+                            folder: folderMap[item.id] || null
+                        }));
+                    setWatchlistItems(allWatchlistItems);
                 }
 
                 // Followers / Following
@@ -131,7 +133,7 @@ const Profile = () => {
                     const followerIds = followersData.map(f => f.follower_id);
                     const { data: followerProfiles } = await supabase
                         .from("profiles")
-                        .select("id, email, avatar_url, is_public")
+                        .select("id, email, avatar_url, is_public, nickname")
                         .in("id", followerIds);
                         
                     const profileMap = {};
@@ -150,7 +152,7 @@ const Profile = () => {
                     const followingIds = followingData.map(f => f.following_id);
                     const { data: followingProfiles } = await supabase
                         .from("profiles")
-                        .select("id, email, avatar_url, is_public")
+                        .select("id, email, avatar_url, is_public, nickname")
                         .in("id", followingIds);
                         
                     const profileMap = {};
@@ -160,7 +162,7 @@ const Profile = () => {
                     setFollowing(fullFollowing);
                 }
 
-                calculateAnalytics(sItems, rItems);
+                calculateAnalytics(allWatchlistItems);
 
             } catch (err) {
                 console.error("Ошибка загрузки профиля:", err);
@@ -171,9 +173,8 @@ const Profile = () => {
         fetchUserData();
     }, [navigate]);
 
-    const calculateAnalytics = (saved, rated) => {
-        // Мы используем Set, чтобы убрать дубликаты (если фильм есть и в watchlist, и в ratings)
-        const uniqueItems = Array.from(new Set([...saved, ...rated]));
+    const calculateAnalytics = (items) => {
+        const uniqueItems = items;
         
         const genreTally = {};
         const catTally = {};
@@ -234,7 +235,8 @@ const Profile = () => {
                     is_public: newVal,
                     email: user.email,
                     avatar_url: avatarUrl,
-                    bio: bio
+                    bio: bio,
+                    nickname: nickname
                 });
 
             if (error) throw error;
@@ -272,7 +274,7 @@ const Profile = () => {
 
             const { error: updateError } = await supabase
                 .from('profiles')
-                .upsert({ id: user.id, avatar_url: publicUrl, email: user.email, is_public: isPublic, bio: bio });
+                .upsert({ id: user.id, avatar_url: publicUrl, email: user.email, is_public: isPublic, bio: bio, nickname: nickname });
 
             if (updateError) throw updateError;
 
@@ -314,7 +316,33 @@ const Profile = () => {
 
     const displayAvatar = avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${user.email}&backgroundColor=3b82f6`;
 
-    const displayItems = activeTab === "watchlist" ? savedItems : ratedItems;
+    const FIXED_FOLDERS = ['В планах', 'Смотрю', 'Просмотрено', 'Брошено'];
+
+    // Фильтрация элементов
+    const displayItems = 
+        activeTab === "ratings" ? watchlistItems.filter(i => i.userRating > 0).sort((a, b) => b.userRating - a.userRating) :
+        activeTab === "watchlist" ? (
+            activeFolder === "all" ? watchlistItems :
+            activeFolder === "unsorted" ? watchlistItems.filter(i => !i.folder) :
+            watchlistItems.filter(i => i.folder === activeFolder)
+        ) : [];
+
+    // Назначить папку элементу
+    const assignFolder = async (itemId, folderName) => {
+        try {
+            await supabase
+                .from("watchlist")
+                .update({ folder: folderName || null })
+                .eq("user_id", user.id)
+                .eq("item_id", itemId);
+            setWatchlistItems(prev => prev.map(i => 
+                i.id === itemId ? { ...i, folder: folderName || null } : i
+            ));
+            setFolderAssignItem(null);
+        } catch (err) {
+            console.error("Error assigning folder:", err);
+        }
+    };
 
     return (
         <div className="profile-page">
@@ -328,7 +356,7 @@ const Profile = () => {
                 </div>
                 <div className="profile-info">
                     <h1 style={{ marginBottom: '4px' }}>
-                        {user.user_metadata?.nickname || user.email.split('@')[0]}
+                        {nickname || user.user_metadata?.nickname || user.email.split('@')[0]}
                     </h1>
                     <p className="profile-email" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{user.email}</p>
                     {bio && <p style={{ color: 'var(--text-secondary)', marginTop: '8px', fontSize: '0.95rem', lineHeight: '1.4', maxWidth: '400px' }}>{bio}</p>}
@@ -360,11 +388,11 @@ const Profile = () => {
                 <h3>{t('library')}</h3>
                 <div className="profile-stats">
                     <div className="stat-card">
-                        <div className="stat-value">{savedItems.length}</div>
+                        <div className="stat-value">{watchlistItems.length}</div>
                         <div className="stat-label">{t('in_watchlist')}</div>
                     </div>
                     <div className="stat-card">
-                        <div className="stat-value">{ratedItems.length}</div>
+                        <div className="stat-value">{watchlistItems.filter(i => i.userRating > 0).length}</div>
                         <div className="stat-label">{t('ratings_left')}</div>
                     </div>
                     
@@ -379,32 +407,76 @@ const Profile = () => {
             </div>
             
             <div className="profile-content">
-                <div className="profile-tabs">
+                <div className="profile-tabs" style={{ display: 'flex', overflowX: 'auto', paddingBottom: '10px' }}>
                     <button 
                         className={`profile-tab ${activeTab === 'feed' ? 'active' : ''}`}
                         onClick={() => setActiveTab('feed')}
+                        style={{ whiteSpace: 'nowrap' }}
                     >
                         Лента активности
                     </button>
                     <button 
                         className={`profile-tab ${activeTab === 'watchlist' ? 'active' : ''}`}
                         onClick={() => setActiveTab('watchlist')}
+                        style={{ whiteSpace: 'nowrap' }}
                     >
                         {t('tab_watchlist')}
                     </button>
                     <button 
                         className={`profile-tab ${activeTab === 'ratings' ? 'active' : ''}`}
                         onClick={() => setActiveTab('ratings')}
+                        style={{ whiteSpace: 'nowrap' }}
                     >
-                        {t('tab_ratings')}
+                        Мои оценки
                     </button>
                     <button 
                         className={`profile-tab ${activeTab === 'settings' ? 'active' : ''}`}
                         onClick={() => setActiveTab('settings')}
+                        style={{ whiteSpace: 'nowrap' }}
                     >
                         {t('tab_settings')}
                     </button>
                 </div>
+                {activeTab === 'watchlist' && (
+                    <div style={{ marginTop: '20px', display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '12px', alignItems: 'center', scrollbarWidth: 'none' }}>
+                        <button 
+                            onClick={() => setActiveFolder('all')}
+                            style={{ 
+                                fontSize: '0.85rem', padding: '6px 14px', borderRadius: '20px', cursor: 'pointer', fontWeight: 600, border: '1px solid', transition: 'all 0.2s', whiteSpace: 'nowrap',
+                                background: activeFolder === 'all' ? 'var(--accent-color)' : 'transparent',
+                                color: activeFolder === 'all' ? 'white' : 'var(--text-secondary)',
+                                borderColor: activeFolder === 'all' ? 'var(--accent-color)' : 'var(--glass-border)'
+                            }}
+                        >
+                            Все
+                        </button>
+                        <button 
+                            onClick={() => setActiveFolder('unsorted')}
+                            style={{ 
+                                fontSize: '0.85rem', padding: '6px 14px', borderRadius: '20px', cursor: 'pointer', fontWeight: 600, border: '1px solid', transition: 'all 0.2s', whiteSpace: 'nowrap',
+                                background: activeFolder === 'unsorted' ? 'var(--accent-color)' : 'transparent',
+                                color: activeFolder === 'unsorted' ? 'white' : 'var(--text-secondary)',
+                                borderColor: activeFolder === 'unsorted' ? 'var(--accent-color)' : 'var(--glass-border)'
+                            }}
+                        >
+                            Без папки
+                        </button>
+                        {FIXED_FOLDERS.map(folder => (
+                            <button 
+                                key={folder}
+                                onClick={() => setActiveFolder(folder)}
+                                style={{ 
+                                    fontSize: '0.85rem', padding: '6px 14px', borderRadius: '20px', cursor: 'pointer', fontWeight: 600, border: '1px solid', transition: 'all 0.2s', whiteSpace: 'nowrap',
+                                    background: activeFolder === folder ? 'var(--accent-color)' : 'transparent',
+                                    color: activeFolder === folder ? 'white' : 'var(--text-secondary)',
+                                    borderColor: activeFolder === folder ? 'var(--accent-color)' : 'var(--glass-border)'
+                                }}
+                            >
+                                {folder}
+                            </button>
+                        ))}
+                    </div>
+                )}
 
                 {activeTab === 'feed' ? (
                     <div style={{ marginTop: '20px' }}>
@@ -427,7 +499,27 @@ const Profile = () => {
                                     value={bio}
                                     onChange={(e) => setBio(e.target.value)}
                                     onBlur={async () => {
-                                        await supabase.from('profiles').upsert({ id: user.id, bio, email: user.email, is_public: isPublic, avatar_url: avatarUrl });
+                                        await supabase.from('profiles').upsert({ id: user.id, bio, nickname, email: user.email, is_public: isPublic, avatar_url: avatarUrl });
+                                    }}
+                                />
+                                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', alignSelf: 'flex-end', marginTop: '4px' }}>Сохраняется автоматически</span>
+                            </div>
+
+                            <div className="settings-card" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+                                <div style={{ marginBottom: '12px' }}>
+                                    <h4>Никнейм</h4>
+                                    <p>Ваше отображаемое имя на платформе</p>
+                                </div>
+                                <input 
+                                    type="text"
+                                    className="auth-input" 
+                                    style={{ margin: 0, padding: '12px' }}
+                                    placeholder="Ваш никнейм"
+                                    value={nickname}
+                                    onChange={(e) => setNickname(e.target.value)}
+                                    onBlur={async () => {
+                                        await supabase.from('profiles').upsert({ id: user.id, bio, nickname, email: user.email, is_public: isPublic, avatar_url: avatarUrl });
+                                        await supabase.auth.updateUser({ data: { nickname } });
                                     }}
                                 />
                                 <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', alignSelf: 'flex-end', marginTop: '4px' }}>Сохраняется автоматически</span>
@@ -569,7 +661,33 @@ const Profile = () => {
                                     </h3>
                                     <div className="grid">
                                         {itemsInCategory.map(item => (
-                                            <ItemCard key={item.id} item={item} />
+                                            <div key={item.id} style={{ position: 'relative' }}>
+                                                <ItemCard item={item} />
+                                                {activeTab === 'watchlist' && (
+                                                    <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10 }}>
+                                                        <button 
+                                                            onClick={(e) => { e.stopPropagation(); setFolderAssignItem(folderAssignItem === item.id ? null : item.id); }}
+                                                            style={{ background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', borderRadius: '8px', padding: '4px 8px', fontSize: '0.75rem', cursor: 'pointer', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', gap: '4px' }}
+                                                        >
+                                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                                                            {item.folder || 'В папку...'}
+                                                        </button>
+                                                        
+                                                        {folderAssignItem === item.id && (
+                                                            <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '4px', background: 'var(--bg-color)', border: '1px solid var(--glass-border)', borderRadius: '8px', overflow: 'hidden', minWidth: '120px', boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
+                                                                <button onClick={() => assignFolder(item.id, null)} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.8rem', borderBottom: '1px solid var(--glass-border)' }}>
+                                                                    Убрать из папки
+                                                                </button>
+                                                                {FIXED_FOLDERS.map(f => (
+                                                                    <button key={f} onClick={() => assignFolder(item.id, f)} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', background: 'transparent', border: 'none', color: 'white', cursor: 'pointer', fontSize: '0.8rem' }} onMouseOver={e => e.currentTarget.style.background='var(--hover-bg)'} onMouseOut={e => e.currentTarget.style.background='transparent'}>
+                                                                        {f}
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
                                         ))}
                                     </div>
                                 </div>
@@ -585,9 +703,10 @@ const Profile = () => {
                             <line x1="2" y1="12" x2="22" y2="12"/>
                         </svg>
                         <p style={{ color: 'var(--text-secondary)', marginBottom: '16px' }}>
-                            {activeTab === 'watchlist' 
-                                ? t('empty_watchlist') 
-                                : t('empty_ratings')}
+                            {activeTab === 'watchlist' ? (
+                                activeFolder === 'all' ? t('empty_watchlist') : `В папке "${activeFolder}" пока пусто.`
+                             ) :
+                             t('empty_ratings')}
                         </p>
                         <Link to="/" className="nav-btn nav-btn-primary" style={{ display: 'inline-flex' }}>{t('find_cool_stuff')}</Link>
                     </div>

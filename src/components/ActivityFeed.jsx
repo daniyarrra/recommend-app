@@ -52,7 +52,8 @@ const ActivityFeed = ({ currentUser }) => {
                         user_id,
                         profiles (
                             email,
-                            avatar_url
+                            avatar_url,
+                            nickname
                         )
                     `)
                     .in("user_id", followingIds)
@@ -85,11 +86,20 @@ const ActivityFeed = ({ currentUser }) => {
 
     if (loading) return <div className="loading-spinner" style={{ margin: "40px auto" }}></div>;
     
-    if (error) return (
-        <div className="empty-state">
-            <p style={{ color: "#f87171" }}>Ошибка загрузки ленты: {error}</p>
-        </div>
-    );
+    if (error) {
+        if (error.includes("JWT expired")) {
+            return (
+                <div className="empty-state">
+                    <p style={{ color: "#f87171" }}>{language === 'ru' ? 'Ваша сессия истекла. Пожалуйста, выйдите из аккаунта и войдите заново.' : 'Your session has expired. Please log out and log in again.'}</p>
+                </div>
+            );
+        }
+        return (
+            <div className="empty-state">
+                <p style={{ color: "#f87171" }}>Ошибка загрузки ленты: {error}</p>
+            </div>
+        );
+    }
 
     if (feed.length === 0) return (
         <div className="empty-state">
@@ -109,7 +119,7 @@ const ActivityFeed = ({ currentUser }) => {
                                 className="review-avatar"
                             />
                             <span className="review-username" style={{ color: 'var(--text-primary)' }}>
-                                {activity.profiles?.email?.split('@')[0]}
+                                {activity.profiles?.nickname || activity.profiles?.email?.split('@')[0]}
                             </span>
                         </Link>
                         <div className="review-date">

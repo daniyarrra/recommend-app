@@ -92,13 +92,16 @@ const PublicProfile = () => {
                 // 4. Load Ratings
                 const { data: ratingsData } = await supabase
                     .from("ratings")
-                    .select("item_id")
+                    .select("item_id, rating")
                     .eq("user_id", id);
                 
                 let rItems = [];
                 if (ratingsData) {
                     const ratedIds = ratingsData.map(r => r.item_id);
-                    rItems = allItems.filter(item => ratedIds.includes(item.id));
+                    rItems = allItems.filter(item => ratedIds.includes(item.id)).map(item => {
+                        const rInfo = ratingsData.find(r => r.item_id === item.id);
+                        return { ...item, userRating: rInfo.rating };
+                    });
                     setRatedItems(rItems);
                 }
 
@@ -179,7 +182,11 @@ const PublicProfile = () => {
     };
 
     const avatarUrl = profile.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${profile.email}&backgroundColor=3b82f6`;
-    const displayItems = activeTab === "watchlist" ? savedItems : ratedItems;
+    const displayItems = activeTab === "watchlist" ? savedItems :
+                         activeTab === "favorites" ? ratedItems.filter(i => i.userRating >= 5) :
+                         activeTab === "watched" ? ratedItems.filter(i => i.userRating >= 3 && i.userRating < 5) :
+                         activeTab === "terrible" ? ratedItems.filter(i => i.userRating <= 2) :
+                         activeTab === "ratings" ? ratedItems : [];
 
     return (
         <div className="profile-page">
@@ -242,18 +249,34 @@ const PublicProfile = () => {
             </div>
             
             <div className="profile-content">
-                <div className="profile-tabs">
+                <div className="profile-tabs" style={{ display: 'flex', overflowX: 'auto', paddingBottom: '10px' }}>
                     <button 
                         className={`profile-tab ${activeTab === 'watchlist' ? 'active' : ''}`}
                         onClick={() => setActiveTab('watchlist')}
+                        style={{ whiteSpace: 'nowrap' }}
                     >
                         {t('tab_watchlist')}
                     </button>
                     <button 
-                        className={`profile-tab ${activeTab === 'ratings' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('ratings')}
+                        className={`profile-tab ${activeTab === 'favorites' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('favorites')}
+                        style={{ whiteSpace: 'nowrap' }}
                     >
-                        {t('tab_ratings')}
+                        Любимые (5★)
+                    </button>
+                    <button 
+                        className={`profile-tab ${activeTab === 'watched' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('watched')}
+                        style={{ whiteSpace: 'nowrap' }}
+                    >
+                        Просмотренные (3-4★)
+                    </button>
+                    <button 
+                        className={`profile-tab ${activeTab === 'terrible' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('terrible')}
+                        style={{ whiteSpace: 'nowrap' }}
+                    >
+                        Ужасные (1-2★)
                     </button>
                 </div>
 
@@ -293,9 +316,12 @@ const PublicProfile = () => {
                 ) : (
                     <div className="empty-state">
                         <p style={{ color: 'var(--text-secondary)', marginBottom: '16px' }}>
-                            Этот пользователь еще ничего не добавил в этот раздел.
-                        </p>
-                    </div>
+                            {activeTab === 'watchlist' ? 'Пользователь еще ничего не добавил в Watchlist' :
+                             activeTab === 'favorites' ? 'У пользователя пока нет любимых фильмов.' :
+                             activeTab === 'watched' ? 'Пользователь еще не оценил фильмы на 3 или 4 звезды.' :
+                             activeTab === 'terrible' ? 'Здесь пусто.' :
+                             'Список пуст'}
+                        </p>       </div>
                 )}
             </div>
         </div>

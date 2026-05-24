@@ -39,7 +39,7 @@ const AdminReviews = () => {
                     .from("ratings")
                     .select(`
                         id, rating, review, item_id, created_at, user_id,
-                        profiles ( email, avatar_url )
+                        profiles ( email, avatar_url, nickname )
                     `)
                     .order("created_at", { ascending: false });
 
@@ -79,7 +79,7 @@ const AdminReviews = () => {
     };
 
     const filtered = reviews.filter(r => {
-        const email = r.profiles?.email || "";
+        const email = r.profiles?.nickname || r.profiles?.email || "";
         const reviewText = r.review || "";
         const title = getItemTitle(r.item_id);
         const matchSearch = email.toLowerCase().includes(search.toLowerCase()) ||
@@ -153,7 +153,7 @@ const AdminReviews = () => {
                                             src={review.profiles?.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${review.profiles?.email}`}
                                             alt="" className="admin-user-avatar"
                                         />
-                                        <span style={{ fontSize: '0.85rem' }}>{review.profiles?.email?.split('@')[0] || '—'}</span>
+                                        <span style={{ fontSize: '0.85rem' }}>{review.profiles?.nickname || review.profiles?.email?.split('@')[0] || '—'}</span>
                                     </div>
                                 </td>
                                 <td>
@@ -204,7 +204,7 @@ const AdminReviews = () => {
                         <h2>{t('admin_confirm_title')}</h2>
                         <p>
                             {t('admin_confirm_delete_review')}<br/>
-                            <strong>{confirmDelete.profiles?.email}</strong> → {getItemTitle(confirmDelete.item_id)}
+                            <strong>{confirmDelete.profiles?.nickname || confirmDelete.profiles?.email}</strong> → {getItemTitle(confirmDelete.item_id)}
                         </p>
                         <div className="admin-modal-actions">
                             <button className="admin-btn admin-btn-ghost" onClick={() => setConfirmDelete(null)}>{t('admin_cancel')}</button>

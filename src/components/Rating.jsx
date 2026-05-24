@@ -9,7 +9,7 @@ const StarIcon = ({ filled, size = 24 }) => (
     </svg>
 );
 
-const Rating = ({ itemId }) => {
+const Rating = ({ itemId, onRatingSaved }) => {
     const { t } = useLanguage();
     const [rating, setRating] = useState(0);
     const [hoverRating, setHoverRating] = useState(0);
@@ -53,11 +53,13 @@ const Rating = ({ itemId }) => {
 
         setSaving(true);
         try {
+            const parsedItemId = parseInt(itemId);
+
             const { data: existing } = await supabase
                 .from("ratings")
                 .select("id")
                 .eq("user_id", user.id)
-                .eq("item_id", parseInt(itemId))
+                .eq("item_id", parsedItemId)
                 .maybeSingle();
 
             if (existing) {
@@ -68,9 +70,25 @@ const Rating = ({ itemId }) => {
             } else {
                 await supabase
                     .from("ratings")
-                    .insert([{ user_id: user.id, item_id: parseInt(itemId), rating, review }]);
+                    .insert([{ user_id: user.id, item_id: parsedItemId, rating, review }]);
             }
+
+            // Автоматически добавляем в watchlist, если ещё не добавлен
+            const { data: inWl } = await supabase
+                .from("watchlist")
+                .select("id")
+                .eq("user_id", user.id)
+                .eq("item_id", parsedItemId)
+                .maybeSingle();
+
+            if (!inWl) {
+                await supabase
+                    .from("watchlist")
+                    .insert([{ user_id: user.id, item_id: parsedItemId }]);
+            }
+
             alert(t('review_saved'));
+            if (onRatingSaved) onRatingSaved();
         } catch (error) {
             console.error("Error saving rating:", error);
             alert(t('review_error'));

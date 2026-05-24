@@ -66,6 +66,8 @@ const ItemDetail = () => {
     // Состояния для Watchlist
     const [user, setUser] = useState(null);
     const [inWatchlist, setInWatchlist] = useState(false);
+    const [itemFolder, setItemFolder] = useState(null);
+    const [showFolderDropdown, setShowFolderDropdown] = useState(false);
     const [processing, setProcessing] = useState(false);
     const [reviews, setReviews] = useState([]);
     const [reviewsLoading, setReviewsLoading] = useState(true);
@@ -95,6 +97,7 @@ const ItemDetail = () => {
                 
                 if (data && data.length > 0) {
                     setInWatchlist(true);
+                    setItemFolder(data[0].folder || null);
                 }
             }
         };
@@ -116,7 +119,8 @@ const ItemDetail = () => {
                     user_id,
                     profiles (
                         email,
-                        avatar_url
+                        avatar_url,
+                        nickname
                     )
                 `)
                 .eq("item_id", parseInt(id))
@@ -183,7 +187,7 @@ const ItemDetail = () => {
             } else {
                 const { error } = await supabase
                     .from("watchlist")
-                    .insert([{ user_id: user.id, item_id: parseInt(id) }]);
+                    .insert([{ user_id: user.id, item_id: parseInt(id), folder: null }]);
                 
                 if (error) throw error;
                 setInWatchlist(true);
@@ -193,6 +197,20 @@ const ItemDetail = () => {
             alert(t('watchlist_error'));
         } finally {
             setProcessing(false);
+        }
+    };
+
+    const changeFolder = async (folderName) => {
+        if (!user) return;
+        try {
+            await supabase
+                .from("watchlist")
+                .update({ folder: folderName })
+                .eq("user_id", user.id)
+                .eq("item_id", parseInt(id));
+            setItemFolder(folderName);
+        } catch(err) {
+            console.error(err);
         }
     };
 
@@ -255,6 +273,41 @@ const ItemDetail = () => {
                             {item.description || t('no_description')}
                         </p>
 
+                        {(item.director?.length > 0 || item.cast?.length > 0) && (
+                            <div className="detail-people-section" style={{ marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                {item.director?.length > 0 && (
+                                    <div className="people-group">
+                                        <h3 style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginBottom: '12px' }}>{language === 'ru' ? 'Режиссер' : 'Director'}</h3>
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
+                                            {Array.isArray(item.director) ? item.director.map((p, i) => (
+                                                <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', width: '80px', textAlign: 'center' }}>
+                                                    <img src={p.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=334155&color=fff`} alt={p.name} style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--glass-border)', background: 'var(--glass-bg)' }} />
+                                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-primary)', lineHeight: '1.2' }}>{p.name}</span>
+                                                </div>
+                                            )) : (
+                                                <span style={{ color: 'var(--text-primary)' }}>{item.director}</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                                {item.cast?.length > 0 && (
+                                    <div className="people-group">
+                                        <h3 style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginBottom: '12px' }}>{language === 'ru' ? 'В ролях' : 'Cast'}</h3>
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
+                                            {Array.isArray(item.cast) ? item.cast.map((p, i) => (
+                                                <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', width: '80px', textAlign: 'center' }}>
+                                                    <img src={p.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=334155&color=fff`} alt={p.name} style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--glass-border)', background: 'var(--glass-bg)' }} />
+                                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-primary)', lineHeight: '1.2' }}>{p.name}</span>
+                                                </div>
+                                            )) : (
+                                                <span style={{ color: 'var(--text-primary)' }}>{item.cast}</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
                         {item.preview_url && (
                             <div style={{ marginBottom: '24px' }}>
                                 <p style={{ color: 'var(--text-secondary)', marginBottom: '10px', fontSize: '0.88rem', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -284,25 +337,63 @@ const ItemDetail = () => {
                             </div>
                         )}
                         
-                        <div className="detail-actions">
-                            <Rating itemId={item.id} />
-                            <button 
-                                className="btn-watchlist" 
-                                onClick={toggleWatchlist}
-                                disabled={processing}
-                                style={{ 
-                                    background: inWatchlist ? 'rgba(239, 68, 68, 0.1)' : 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-                                    border: inWatchlist ? '1px solid rgba(239, 68, 68, 0.3)' : 'none',
-                                    color: inWatchlist ? '#f87171' : 'var(--btn-text)'
-                                }}
-                            >
-                                {processing ? (
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation: 'spin 0.8s linear infinite' }}>
-                                        <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-                                    </svg>
-                                ) : inWatchlist ? <CheckIcon /> : <PlusIcon />}
-                                {processing ? "..." : (inWatchlist ? t('remove_watchlist') : t('add_watchlist'))}
-                            </button>
+                        <div className="detail-actions" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                            <Rating itemId={item.id} onRatingSaved={() => setInWatchlist(true)} />
+                            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                <button 
+                                    className="btn-watchlist" 
+                                    onClick={toggleWatchlist}
+                                    disabled={processing}
+                                    style={{ 
+                                        background: inWatchlist ? 'rgba(239, 68, 68, 0.1)' : 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+                                        border: inWatchlist ? '1px solid rgba(239, 68, 68, 0.3)' : 'none',
+                                        color: inWatchlist ? '#f87171' : 'var(--btn-text)'
+                                    }}
+                                >
+                                    {processing ? (
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation: 'spin 0.8s linear infinite' }}>
+                                            <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                                        </svg>
+                                    ) : inWatchlist ? <CheckIcon /> : <PlusIcon />}
+                                    {processing ? "..." : (inWatchlist ? t('remove_watchlist') : t('add_watchlist'))}
+                                </button>
+
+                                {inWatchlist && (
+                                    <div style={{ position: 'relative' }}>
+                                        <button 
+                                            onClick={() => setShowFolderDropdown(!showFolderDropdown)}
+                                            style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', color: 'var(--text-primary)', padding: '0 16px', borderRadius: '12px', height: '48px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, backdropFilter: 'blur(12px)' }}
+                                        >
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                                            {itemFolder || 'Без папки'}
+                                        </button>
+                                        {showFolderDropdown && (
+                                            <div style={{ position: 'absolute', bottom: 'calc(100% + 4px)', top: 'auto', left: 0, background: 'var(--bg-color)', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '8px', zIndex: 1000, minWidth: '160px', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
+                                                {['В планах', 'Смотрю', 'Просмотрено', 'Брошено'].map(f => (
+                                                    <button 
+                                                        key={f}
+                                                        onClick={() => { changeFolder(f); setShowFolderDropdown(false); }}
+                                                        style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', background: itemFolder === f ? 'var(--accent-color)' : 'transparent', color: itemFolder === f ? 'white' : 'var(--text-primary)', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '0.9rem', marginBottom: '4px' }}
+                                                        onMouseOver={e=>e.currentTarget.style.background = itemFolder === f ? 'var(--accent-color)' : 'var(--hover-bg)'}
+                                                        onMouseOut={e=>e.currentTarget.style.background = itemFolder === f ? 'var(--accent-color)' : 'transparent'}
+                                                    >
+                                                        {f}
+                                                    </button>
+                                                ))}
+                                                <div style={{ height: '1px', background: 'var(--glass-border)', margin: '4px 0' }}></div>
+                                                <button 
+                                                    onClick={() => { changeFolder(null); setShowFolderDropdown(false); }}
+                                                    style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', background: 'transparent', color: 'var(--text-secondary)', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem' }}
+                                                    onMouseOver={e=>e.currentTarget.style.background='var(--hover-bg)'}
+                                                    onMouseOut={e=>e.currentTarget.style.background='transparent'}
+                                                >
+                                                    Убрать из папки
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -328,7 +419,7 @@ const ItemDetail = () => {
                                                 className="review-avatar"
                                             />
                                             <span className="review-username" style={{ color: 'var(--text-primary)' }}>
-                                                {rev.profiles?.email?.split('@')[0]}
+                                                {rev.profiles?.nickname || rev.profiles?.email?.split('@')[0]}
                                             </span>
                                         </Link>
                                         <div className="review-stars">

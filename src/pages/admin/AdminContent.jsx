@@ -7,7 +7,8 @@ const CATEGORIES = ["Все", "Фильмы", "Сериалы", "Книги", "�
 const emptyItem = {
     title: "", genre: "", category: "Фильмы",
     description_ru: "", description_en: "", description_kz: "",
-    image: "", trailer_url: "", preview_url: "", artist: "", is_featured: false
+    image: "", trailer_url: "", preview_url: "", artist: "", is_featured: false,
+    cast: [], director: []
 };
 
 const AdminContent = () => {
@@ -53,6 +54,8 @@ const AdminContent = () => {
             trailer_url: item.trailer_url || "",
             preview_url: item.preview_url || "",
             artist: item.artist || "",
+            cast: Array.isArray(item.cast) ? item.cast : (item.cast ? [{name: item.cast, photo: ''}] : []),
+            director: Array.isArray(item.director) ? item.director : (item.director ? [{name: item.director, photo: ''}] : []),
             is_featured: item.is_featured || false
         });
         setShowModal(true);
@@ -277,11 +280,39 @@ const AdminContent = () => {
                         </div>
 
                         {(form.category === "Фильмы" || form.category === "Сериалы") && (
-                            <div className="admin-form-group">
-                                <label className="admin-form-label">{t('admin_trailer_url')}</label>
-                                <input className="admin-form-input" value={form.trailer_url}
-                                    onChange={e => setForm({...form, trailer_url: e.target.value})} placeholder="https://www.youtube.com/embed/..." />
-                            </div>
+                            <>
+                                <div className="admin-form-group">
+                                    <label className="admin-form-label">{t('admin_trailer_url')}</label>
+                                    <input className="admin-form-input" value={form.trailer_url}
+                                        onChange={e => setForm({...form, trailer_url: e.target.value})} placeholder="https://www.youtube.com/embed/..." />
+                                </div>
+                                <div className="admin-form-group">
+                                    <label className="admin-form-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        Режиссер
+                                        <button className="admin-btn admin-btn-sm admin-btn-ghost" onClick={() => setForm({...form, director: [...form.director, {name: '', photo: ''}]})}>+ Добавить</button>
+                                    </label>
+                                    {form.director.map((d, i) => (
+                                        <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                                            <input className="admin-form-input" value={d.name} onChange={e => { const nd = [...form.director]; nd[i].name = e.target.value; setForm({...form, director: nd}) }} placeholder="Имя" style={{ flex: 1, margin: 0 }} />
+                                            <input className="admin-form-input" value={d.photo} onChange={e => { const nd = [...form.director]; nd[i].photo = e.target.value; setForm({...form, director: nd}) }} placeholder="URL фото" style={{ flex: 1, margin: 0 }} />
+                                            <button className="admin-btn admin-btn-sm admin-btn-danger" onClick={() => { const nd = form.director.filter((_, idx) => idx !== i); setForm({...form, director: nd}) }}>X</button>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="admin-form-group">
+                                    <label className="admin-form-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        Актерский состав
+                                        <button className="admin-btn admin-btn-sm admin-btn-ghost" onClick={() => setForm({...form, cast: [...form.cast, {name: '', photo: ''}]})}>+ Добавить</button>
+                                    </label>
+                                    {form.cast.map((c, i) => (
+                                        <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                                            <input className="admin-form-input" value={c.name} onChange={e => { const nc = [...form.cast]; nc[i].name = e.target.value; setForm({...form, cast: nc}) }} placeholder="Имя" style={{ flex: 1, margin: 0 }} />
+                                            <input className="admin-form-input" value={c.photo} onChange={e => { const nc = [...form.cast]; nc[i].photo = e.target.value; setForm({...form, cast: nc}) }} placeholder="URL фото" style={{ flex: 1, margin: 0 }} />
+                                            <button className="admin-btn admin-btn-sm admin-btn-danger" onClick={() => { const nc = form.cast.filter((_, idx) => idx !== i); setForm({...form, cast: nc}) }}>X</button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
                         )}
 
                         {form.category === "Музыка" && (

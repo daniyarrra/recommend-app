@@ -30,6 +30,14 @@ const ItemCard = ({ item }) => {
                         {t('ai_match')}
                     </div>
                 )}
+                {item.userRating > 0 && (
+                    <div style={{ position: 'absolute', top: '10px', left: '10px', background: 'rgba(251, 191, 36, 0.9)', color: '#1a1a2e', padding: '4px 8px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '3px', backdropFilter: 'blur(4px)' }}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="#1a1a2e" stroke="none">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                        </svg>
+                        {item.userRating}/5
+                    </div>
+                )}
             </div>
             <div className="card-content">
                 <div className="genre">{item.genre}</div>
