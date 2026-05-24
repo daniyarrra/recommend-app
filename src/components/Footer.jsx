@@ -29,27 +29,7 @@ const Footer = () => {
                                 RecMedia
                             </text>
                         </svg>
-                        <p className="footer-desc">{t('footer_desc') || 'Your ultimate destination for discovering the best movies, books, and music tailored to your taste.'}</p>
-                    </div>
-                    
-                    <div className="footer-links-group">
-                        <h4 className="footer-heading">Explore</h4>
-                        <Link to="/" className="footer-link">{t('nav_movies') || 'Movies'}</Link>
-                        <Link to="/books" className="footer-link">{t('nav_books') || 'Books'}</Link>
-                        <Link to="/music" className="footer-link">{t('nav_music') || 'Music'}</Link>
-                        <Link to="/recommend" className="footer-link">{t('nav_recommend') || 'Recommendations'}</Link>
-                    </div>
-
-                    <div className="footer-links-group">
-                        <h4 className="footer-heading">Account</h4>
-                        <Link to="/profile" className="footer-link">{t('nav_profile') || 'Profile'}</Link>
-                        <Link to="/login" className="footer-link">{t('nav_login') || 'Login'}</Link>
-                        <Link to="/register" className="footer-link">{t('nav_register') || 'Register'}</Link>
-                    </div>
-
-                    <div className="footer-links-group">
-                        <h4 className="footer-heading">Connect</h4>
-                        <div className="social-links">
+                        <div className="social-links" style={{ marginTop: '20px' }}>
                             <a href="https://www.instagram.com/don4ika/" target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="Instagram">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
@@ -70,6 +50,21 @@ const Footer = () => {
                                 </svg>
                             </a>
                         </div>
+                    </div>
+                    
+                    <div className="footer-links-group">
+                        <h4 className="footer-heading">Explore</h4>
+                        <Link to="/" className="footer-link">{t('nav_movies') || 'Movies'}</Link>
+                        <Link to="/books" className="footer-link">{t('nav_books') || 'Books'}</Link>
+                        <Link to="/music" className="footer-link">{t('nav_music') || 'Music'}</Link>
+                        <Link to="/recommend" className="footer-link">{t('nav_recommend') || 'Recommendations'}</Link>
+                    </div>
+
+                    <div className="footer-links-group">
+                        <h4 className="footer-heading">Account</h4>
+                        <Link to="/profile" className="footer-link">{t('nav_profile') || 'Profile'}</Link>
+                        <Link to="/login" className="footer-link">{t('nav_login') || 'Login'}</Link>
+                        <Link to="/register" className="footer-link">{t('nav_register') || 'Register'}</Link>
                     </div>
                 </div>
                 <div className="footer-bottom">
