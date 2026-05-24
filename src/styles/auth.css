@@ -141,3 +141,40 @@
 .auth-link:hover {
     color: #818cf8;
 }
+
+@media (max-width: 480px) {
+    .auth-page {
+        padding: 16px 12px;
+        min-height: calc(100vh - 80px);
+    }
+
+    .auth-card {
+        padding: 32px 20px;
+        border-radius: 18px;
+    }
+
+    .auth-title {
+        font-size: 1.5rem;
+    }
+
+    .auth-subtitle {
+        font-size: 0.88rem;
+        margin-bottom: 24px;
+    }
+
+    .auth-input {
+        padding: 12px 14px;
+        font-size: 0.92rem;
+        border-radius: 10px;
+    }
+
+    .auth-btn {
+        padding: 12px;
+        font-size: 0.92rem;
+        border-radius: 10px;
+    }
+
+    .auth-footer {
+        font-size: 0.82rem;
+    }
+}

@@ -302,18 +302,43 @@
     40% { transform: scale(1); }
 }
 
+@media (max-width: 768px) {
+    .ai-chat-widget {
+        bottom: 90px;
+        right: 16px;
+    }
+
+    .ai-chat-toggle {
+        width: 52px;
+        height: 52px;
+    }
+}
+
 @media (max-width: 480px) {
+    .ai-chat-widget {
+        bottom: 80px;
+        right: 12px;
+    }
+
+    .ai-chat-toggle {
+        width: 48px;
+        height: 48px;
+    }
+
     .ai-chat-window {
+        position: fixed;
         bottom: 0;
         right: 0;
+        left: 0;
+        top: 0;
         width: 100vw;
         height: 100vh;
         max-height: 100vh;
         border-radius: 0;
     }
-    
-    .ai-chat-toggle {
-        bottom: 20px;
-        right: 20px;
+
+    .message-bubble {
+        font-size: 0.88rem;
+        padding: 10px 14px;
     }
 }

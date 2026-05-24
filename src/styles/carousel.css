@@ -133,10 +133,24 @@
     .carousel-btn {
         display: none !important; /* Mobile relies on native touch swipe */
     }
+
+    .carousel-wrapper {
+        margin-bottom: 32px;
+    }
     
     .carousel-wrapper::before,
     .carousel-wrapper::after {
-        width: 30px;
+        width: 20px;
+    }
+
+    .carousel-container {
+        gap: 14px;
+        padding-bottom: 20px;
+        padding-top: 8px;
+    }
+
+    .carousel-container > * {
+        width: 220px;
     }
     
     /* Disable the dimming effect on mobile to avoid buggy touch states */
@@ -149,5 +163,20 @@
     .carousel-container > .card:hover {
         transform: none;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+}
+
+@media (max-width: 480px) {
+    .carousel-wrapper {
+        margin-bottom: 24px;
+    }
+
+    .carousel-container {
+        gap: 10px;
+        padding-bottom: 14px;
+    }
+
+    .carousel-container > * {
+        width: 170px;
     }
 }

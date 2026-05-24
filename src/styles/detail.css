@@ -236,18 +236,89 @@
 }
 
 @media (max-width: 768px) {
+    .detail-page {
+        padding: 20px 14px;
+    }
+
     .detail-layout {
         flex-direction: column;
-        padding: 24px;
+        padding: 20px;
+        border-radius: 18px;
+        gap: 20px;
     }
     
     .detail-poster-container {
         flex: 0 0 auto;
-        max-width: 280px;
+        max-width: 240px;
         margin: 0 auto;
     }
 
+    .detail-poster {
+        border-radius: 16px;
+    }
+
     .detail-title {
-        font-size: 1.8rem;
+        font-size: 1.6rem;
+    }
+
+    .detail-description {
+        font-size: 0.92rem;
+        margin-bottom: 20px;
+    }
+
+    .btn-watchlist {
+        padding: 12px 24px;
+        font-size: 0.92rem;
+        border-radius: 12px;
+    }
+
+    .reviews-section {
+        margin-top: 36px;
+    }
+
+    .review-card {
+        padding: 16px;
+        border-radius: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .detail-page {
+        padding: 14px 10px;
+    }
+
+    .detail-layout {
+        padding: 14px;
+        border-radius: 14px;
+        gap: 16px;
+    }
+
+    .detail-poster-container {
+        max-width: 200px;
+    }
+
+    .detail-title {
+        font-size: 1.4rem;
+    }
+
+    .detail-meta {
+        gap: 8px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+    }
+
+    .detail-genre {
+        font-size: 0.72rem;
+        padding: 3px 10px;
+    }
+
+    .detail-description {
+        font-size: 0.85rem;
+        line-height: 1.6;
+        margin-bottom: 16px;
+    }
+
+    .reviews-title {
+        font-size: 1.3rem;
     }
 }
