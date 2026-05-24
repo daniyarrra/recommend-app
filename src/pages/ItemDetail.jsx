@@ -101,6 +101,7 @@ const ItemDetail = () => {
         
         checkWatchlist();
         fetchReviews();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id, language]);
 
     const fetchReviews = async () => {

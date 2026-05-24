@@ -51,8 +51,6 @@ const AudioPlayer = ({ src, variant = "compact" }) => {
         const audio = audioRef.current;
         if (!audio) return;
 
-        audio.volume = volume;
-
         const updateProgress = () => {
             if (audio.duration) {
                 setProgress((audio.currentTime / audio.duration) * 100);

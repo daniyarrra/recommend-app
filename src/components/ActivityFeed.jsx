@@ -12,7 +12,7 @@ const StarIcon = ({ filled, size = 16 }) => (
 );
 
 const ActivityFeed = ({ currentUser }) => {
-    const { t, language } = useLanguage();
+    const { language } = useLanguage();
     const [feed, setFeed] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
