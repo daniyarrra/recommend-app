@@ -327,8 +327,10 @@ const Profile = () => {
                     </label>
                 </div>
                 <div className="profile-info">
-                    <h1>{t('profile_title')}</h1>
-                    <p className="profile-email">{user.email}</p>
+                    <h1 style={{ marginBottom: '4px' }}>
+                        {user.user_metadata?.nickname || user.email.split('@')[0]}
+                    </h1>
+                    <p className="profile-email" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{user.email}</p>
                     {bio && <p style={{ color: 'var(--text-secondary)', marginTop: '8px', fontSize: '0.95rem', lineHeight: '1.4', maxWidth: '400px' }}>{bio}</p>}
                     {topGenres.length > 0 && (
                         <div className="profile-favorite-genres">
@@ -609,7 +611,7 @@ const Profile = () => {
                                     <Link key={p.id} to={`/user/${p.id}`} style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none', padding: '8px', borderRadius: '8px', background: 'var(--hover-bg)' }} onClick={() => setShowModal(null)}>
                                         <img src={p.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${p.email}&backgroundColor=3b82f6`} alt="avatar" style={{ width: '40px', height: '40px', borderRadius: '50%' }} />
                                         <div style={{ color: 'var(--text-primary)' }}>
-                                            <strong>{p.email.split('@')[0]}</strong>
+                                            <strong>{p.nickname || p.email.split('@')[0]}</strong>
                                             {p.is_private && <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Профиль скрыт</div>}
                                         </div>
                                     </Link>

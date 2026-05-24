@@ -186,8 +186,10 @@ const PublicProfile = () => {
             <div className="profile-header">
                 <img src={avatarUrl} alt="Аватар профиля" className="profile-avatar-img" />
                 <div className="profile-info">
-                    <h1>Профиль пользователя</h1>
-                    <p className="profile-email">{profile.email.split('@')[0]}</p>
+                    <h1 style={{ marginBottom: '4px' }}>
+                        {profile.nickname || profile.email.split('@')[0]}
+                    </h1>
+                    <p className="profile-email" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{profile.email}</p>
                     {profile.bio && <p style={{ color: 'var(--text-secondary)', marginTop: '8px', fontSize: '0.95rem', lineHeight: '1.4', maxWidth: '400px' }}>{profile.bio}</p>}
                     {topGenres.length > 0 && (
                         <div className="profile-favorite-genres">
