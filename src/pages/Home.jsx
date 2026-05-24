@@ -55,7 +55,14 @@ const Home = () => {
 
     const moviesAndTvItems = items.filter(item => item.category === "Фильмы" || item.category === "Сериалы" || item.category === "Movies" || item.category === "TV Shows");
     const featuredItems = moviesAndTvItems.filter(item => item.is_featured);
-    const sliderItems = featuredItems.length > 0 ? featuredItems : moviesAndTvItems;
+    
+    // Всегда показываем 5 фильмов в верхнем слайдере
+    let sliderItems = [...featuredItems];
+    if (sliderItems.length < 5) {
+        const remaining = moviesAndTvItems.filter(item => !sliderItems.find(f => f.id === item.id));
+        sliderItems = [...sliderItems, ...remaining];
+    }
+    sliderItems = sliderItems.slice(0, 5);
 
     return (
         <PageTransition>
