@@ -22,7 +22,8 @@
 .footer-content {
     display: flex;
     flex-wrap: wrap;
-    gap: 80px;
+    justify-content: center;
+    gap: 100px;
     margin-bottom: 40px;
 }
 
