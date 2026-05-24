@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { useEffect } from "react";
+import PageTransition from "./components/PageTransition";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -28,16 +29,16 @@ function AppRoutes() {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<Home />} />
-        <Route path="/item/:id" element={<ItemDetail />} />
-        <Route path="/books" element={<Books />} />
-        <Route path="/music" element={<Music />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/recommend" element={<Recommendations />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/user/:id" element={<PublicProfile />} />
-        <Route path="/admin" element={<AdminLayout />}>
+        <Route path="/" element={<PageTransition><Home /></PageTransition>} />
+        <Route path="/item/:id" element={<PageTransition><ItemDetail /></PageTransition>} />
+        <Route path="/books" element={<PageTransition><Books /></PageTransition>} />
+        <Route path="/music" element={<PageTransition><Music /></PageTransition>} />
+        <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
+        <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
+        <Route path="/recommend" element={<PageTransition><Recommendations /></PageTransition>} />
+        <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
+        <Route path="/user/:id" element={<PageTransition><PublicProfile /></PageTransition>} />
+        <Route path="/admin" element={<PageTransition><AdminLayout /></PageTransition>}>
           <Route index element={<AdminDashboard />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="content" element={<AdminContent />} />
