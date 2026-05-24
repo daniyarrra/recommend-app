@@ -338,7 +338,7 @@ const ItemDetail = () => {
                         )}
                         
                         <div className="detail-actions" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                            <Rating itemId={item.id} onRatingSaved={() => setInWatchlist(true)} />
+                            <Rating itemId={item.id} />
                             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                                 <button 
                                     className="btn-watchlist" 

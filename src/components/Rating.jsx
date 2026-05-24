@@ -73,20 +73,6 @@ const Rating = ({ itemId, onRatingSaved }) => {
                     .insert([{ user_id: user.id, item_id: parsedItemId, rating, review }]);
             }
 
-            // Автоматически добавляем в watchlist, если ещё не добавлен
-            const { data: inWl } = await supabase
-                .from("watchlist")
-                .select("id")
-                .eq("user_id", user.id)
-                .eq("item_id", parsedItemId)
-                .maybeSingle();
-
-            if (!inWl) {
-                await supabase
-                    .from("watchlist")
-                    .insert([{ user_id: user.id, item_id: parsedItemId }]);
-            }
-
             alert(t('review_saved'));
             if (onRatingSaved) onRatingSaved();
         } catch (error) {

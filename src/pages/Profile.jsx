@@ -86,9 +86,6 @@ const Profile = () => {
                     if (profileData.nickname) setNickname(profileData.nickname);
                 }
 
-                const res = await API.get("/items");
-                const allItems = res.data;
-
                 // Watchlist с папками
                 const { data: watchlistData } = await supabase
                     .from("watchlist")
@@ -111,17 +108,31 @@ const Profile = () => {
                     watchlistData.forEach(w => { folderMap[w.item_id] = w.folder || null; });
                 }
                 
-                if (watchlistData) {
-                    const savedIds = watchlistData.map(w => w.item_id);
-                    allWatchlistItems = allItems
-                        .filter(item => savedIds.includes(item.id))
-                        .map(item => ({
-                            ...item,
-                            userRating: ratingsMap[item.id] || 0,
-                            folder: folderMap[item.id] || null
-                        }));
-                    setWatchlistItems(allWatchlistItems);
+                const itemIds = new Set([
+                    ...(watchlistData || []).map(w => w.item_id),
+                    ...(ratingsData || []).map(r => r.item_id)
+                ]);
+
+                let allItems = [];
+                const idsArray = Array.from(itemIds);
+                if (idsArray.length > 0) {
+                    const res = await API.get(`/items?ids=${idsArray.join(',')}`);
+                    allItems = res.data;
                 }
+
+                allWatchlistItems = idsArray.map(itemId => {
+                    const item = allItems.find(i => i.id === itemId);
+                    if (item) {
+                        return {
+                            ...item,
+                            userRating: ratingsMap[itemId] || 0,
+                            folder: folderMap[itemId] || null,
+                            inWatchlist: folderMap[itemId] !== undefined // if it's in folderMap, it's in watchlistData
+                        };
+                    }
+                    return null;
+                }).filter(Boolean);
+                setWatchlistItems(allWatchlistItems);
 
                 // Followers / Following
                 const { data: followersData } = await supabase
@@ -322,9 +333,9 @@ const Profile = () => {
     const displayItems = 
         activeTab === "ratings" ? watchlistItems.filter(i => i.userRating > 0).sort((a, b) => b.userRating - a.userRating) :
         activeTab === "watchlist" ? (
-            activeFolder === "all" ? watchlistItems :
-            activeFolder === "unsorted" ? watchlistItems.filter(i => !i.folder) :
-            watchlistItems.filter(i => i.folder === activeFolder)
+            activeFolder === "all" ? watchlistItems.filter(i => i.inWatchlist) :
+            activeFolder === "unsorted" ? watchlistItems.filter(i => i.inWatchlist && !i.folder) :
+            watchlistItems.filter(i => i.inWatchlist && i.folder === activeFolder)
         ) : [];
 
     // Назначить папку элементу
@@ -332,11 +343,9 @@ const Profile = () => {
         try {
             await supabase
                 .from("watchlist")
-                .update({ folder: folderName || null })
-                .eq("user_id", user.id)
-                .eq("item_id", itemId);
+                .upsert({ user_id: user.id, item_id: itemId, folder: folderName || null }, { onConflict: "user_id, item_id" });
             setWatchlistItems(prev => prev.map(i => 
-                i.id === itemId ? { ...i, folder: folderName || null } : i
+                i.id === itemId ? { ...i, folder: folderName || null, inWatchlist: true } : i
             ));
             setFolderAssignItem(null);
         } catch (err) {
