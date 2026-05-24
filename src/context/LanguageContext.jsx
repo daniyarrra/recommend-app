@@ -100,6 +100,7 @@ export const translations = {
     login_error: "Ошибка входа: ",
     // Register
     register_title: "Создать аккаунт",
+    nickname_placeholder: "Ваш Никнейм",
     password_hint: "Придумайте пароль (минимум 6 символов)",
     register_btn: "Зарегистрироваться",
     has_account: "Уже есть аккаунт?",
@@ -281,6 +282,7 @@ export const translations = {
     login_error: "Login error: ",
     // Register
     register_title: "Create Account",
+    nickname_placeholder: "Your Nickname",
     password_hint: "Create a password (min. 6 characters)",
     register_btn: "Sign Up",
     has_account: "Already have an account?",
@@ -462,6 +464,7 @@ export const translations = {
     login_error: "Кіру қатесі: ",
     // Register
     register_title: "Аккаунт жасау",
+    nickname_placeholder: "Сіздің Лақап атыңыз",
     password_hint: "Құпия сөз ойлап табыңыз (кемінде 6 таңба)",
     register_btn: "Тіркелу",
     has_account: "Аккаунтыңыз бар ма?",

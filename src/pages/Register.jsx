@@ -7,6 +7,7 @@ import "../styles/auth.css";
 const Register = () => {
     const { t } = useLanguage();
     const [email, setEmail] = useState("");
+    const [nickname, setNickname] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -18,6 +19,11 @@ const Register = () => {
             const { data, error } = await supabase.auth.signUp({
                 email,
                 password,
+                options: {
+                    data: {
+                        nickname: nickname
+                    }
+                }
             });
             
             if (error) throw error;
@@ -42,6 +48,14 @@ const Register = () => {
                 <h2 className="auth-title">{t('register_title')}</h2>
                 
                 <form className="auth-form" onSubmit={handleRegister}>
+                    <input 
+                        type="text"
+                        className="auth-input"
+                        placeholder={t('nickname_placeholder')} 
+                        onChange={e => setNickname(e.target.value)} 
+                        required
+                        minLength={2}
+                    />
                     <input 
                         type="email"
                         className="auth-input"
