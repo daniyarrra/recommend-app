@@ -246,8 +246,8 @@
 /* Mobile */
 @media (max-width: 768px) {
     .hero-slider-container {
-        height: 70vh;
-        min-height: 550px;
+        height: 75vh;
+        min-height: 620px;
         border-radius: 20px;
         margin-bottom: 32px;
     }

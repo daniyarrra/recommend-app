@@ -457,6 +457,10 @@ body::before {
 
 /* ── Responsive ── */
 @media (max-width: 640px) {
+  body {
+    padding-bottom: 80px; /* Space for bottom navbar */
+  }
+
   .grid {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 16px;
