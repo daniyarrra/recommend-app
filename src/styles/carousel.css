@@ -1,0 +1,153 @@
+/* src/styles/carousel.css */
+.carousel-wrapper {
+    position: relative;
+    width: 100%;
+    margin-bottom: 60px;
+}
+
+/* Cinematic fade masks on the edges */
+.carousel-wrapper::before,
+.carousel-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 60px;
+    height: calc(100% - 40px); /* minus padding bottom */
+    z-index: 5;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+    opacity: 0;
+}
+
+.carousel-wrapper.has-left-scroll::before {
+    left: 0;
+    background: linear-gradient(to right, var(--bg-color) 0%, transparent 100%);
+    opacity: 1;
+}
+
+.carousel-wrapper.has-right-scroll::after {
+    right: 0;
+    background: linear-gradient(to left, var(--bg-color) 0%, transparent 100%);
+    opacity: 1;
+}
+
+.carousel-container {
+    display: flex;
+    overflow-x: auto;
+    gap: 28px;
+    padding-bottom: 40px;
+    padding-top: 15px; /* extra top padding for hover scale */
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    
+    /* Hide scrollbar completely */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+.carousel-container::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+}
+
+.carousel-container > * {
+    flex: 0 0 auto;
+    width: 280px;
+    scroll-snap-align: start;
+}
+
+/* Beautiful navigation buttons */
+.carousel-btn {
+    position: absolute;
+    top: calc(50% - 20px); /* Adjust for padding-bottom of container */
+    transform: translateY(-50%);
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: var(--surface-color);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* Only show buttons on hover over the carousel wrapper */
+.carousel-wrapper:hover .carousel-btn {
+    opacity: 0.9;
+    visibility: visible;
+}
+
+.carousel-btn:hover {
+    opacity: 1 !important;
+    background: var(--gradient-primary);
+    color: white;
+    transform: translateY(-50%) scale(1.15);
+    box-shadow: 0 12px 40px var(--accent-glow);
+    border-color: transparent;
+}
+
+.carousel-btn.left {
+    left: -20px;
+}
+
+.carousel-btn.right {
+    right: -20px;
+}
+
+/* Dim background items when hovering one item */
+.carousel-container:hover > .card:not(:hover) {
+    transform: scale(0.95);
+    opacity: 0.6;
+    filter: blur(1.5px) grayscale(0.2);
+}
+
+/* Better Card hover state in carousel to pop out */
+.carousel-container > .card {
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.carousel-container > .card:hover {
+    transform: translateY(-15px) scale(1.05);
+    z-index: 10;
+    box-shadow: 
+        0 30px 60px -12px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(96, 165, 250, 0.3),
+        0 0 50px -8px rgba(99, 102, 241, 0.25);
+}
+
+@media (max-width: 1024px) {
+    .carousel-btn.left { left: 10px; }
+    .carousel-btn.right { right: 10px; }
+}
+
+@media (max-width: 768px) {
+    .carousel-btn {
+        display: none !important; /* Mobile relies on native touch swipe */
+    }
+    
+    .carousel-wrapper::before,
+    .carousel-wrapper::after {
+        width: 30px;
+    }
+    
+    /* Disable the dimming effect on mobile to avoid buggy touch states */
+    .carousel-container:hover > .card:not(:hover) {
+        transform: none;
+        opacity: 1;
+        filter: none;
+    }
+    
+    .carousel-container > .card:hover {
+        transform: none;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+}

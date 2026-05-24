@@ -1,0 +1,338 @@
+import { useEffect, useState } from "react";
+import API from "../../services/api";
+import { useLanguage } from "../../context/LanguageContext";
+
+const CATEGORIES = ["Все", "Фильмы", "Сериалы", "Книги", "Музыка"];
+
+const emptyItem = {
+    title: "", genre: "", category: "Фильмы",
+    description_ru: "", description_en: "", description_kz: "",
+    image: "", trailer_url: "", preview_url: "", artist: "", is_featured: false
+};
+
+const AdminContent = () => {
+    const { t } = useLanguage();
+    const [items, setItems] = useState([]);
+    const [search, setSearch] = useState("");
+    const [filterCat, setFilterCat] = useState("Все");
+    const [loading, setLoading] = useState(true);
+    const [showModal, setShowModal] = useState(false);
+    const [editItem, setEditItem] = useState(null);
+    const [form, setForm] = useState({ ...emptyItem });
+    const [saving, setSaving] = useState(false);
+    const [uploading, setUploading] = useState(false);
+    const [aiLoading, setAiLoading] = useState(false);
+    const [confirmDelete, setConfirmDelete] = useState(null);
+
+    const fetchItems = async () => {
+        try {
+            const res = await API.get("/items");
+            setItems(res.data);
+        } catch (err) { console.error(err); }
+        setLoading(false);
+    };
+
+    useEffect(() => { fetchItems(); }, []);
+
+    const openCreate = () => {
+        setEditItem(null);
+        setForm({ ...emptyItem });
+        setShowModal(true);
+    };
+
+    const openEdit = (item) => {
+        setEditItem(item);
+        setForm({
+            title: item.title || "",
+            genre: item.genre || "",
+            category: item.category || "Фильмы",
+            description_ru: typeof item.description === 'object' ? (item.description?.ru || "") : (item.description || ""),
+            description_en: typeof item.description === 'object' ? (item.description?.en || "") : "",
+            description_kz: typeof item.description === 'object' ? (item.description?.kz || "") : "",
+            image: item.image || "",
+            trailer_url: item.trailer_url || "",
+            preview_url: item.preview_url || "",
+            artist: item.artist || "",
+            is_featured: item.is_featured || false
+        });
+        setShowModal(true);
+    };
+
+    const handleAIFill = async () => {
+        if (!form.title || !form.category) {
+            alert("Сначала введите название и выберите категорию");
+            return;
+        }
+        setAiLoading(true);
+        try {
+            const res = await API.post("/admin/ai-fill", { title: form.title, category: form.category });
+            setForm(prev => ({
+                ...prev,
+                genre: res.data.genre || prev.genre,
+                description_ru: res.data.description_ru || prev.description_ru,
+                description_en: res.data.description_en || prev.description_en,
+                description_kz: res.data.description_kz || prev.description_kz,
+            }));
+        } catch (err) {
+            console.error(err);
+            alert("Ошибка ИИ. Проверьте консоль или API ключ.");
+        }
+        setAiLoading(false);
+    };
+
+    const handleImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        setUploading(true);
+        try {
+            const res = await API.post("/admin/upload", formData, {
+                headers: { "Content-Type": "multipart/form-data" }
+            });
+            setForm({ ...form, image: res.data.url });
+        } catch (err) {
+            console.error("Upload error:", err);
+            alert("Ошибка загрузки изображения");
+        }
+        setUploading(false);
+    };
+
+    const handleSave = async () => {
+        if (!form.title || !form.genre || !form.category) {
+            alert(t('admin_fill_required'));
+            return;
+        }
+        setSaving(true);
+        try {
+            const payload = { ...form };
+            if (editItem) {
+                await API.put(`/admin/items/${editItem.id}`, payload);
+            } else {
+                await API.post("/admin/items", payload);
+            }
+            setShowModal(false);
+            await fetchItems();
+        } catch (err) {
+            console.error(err);
+            alert(t('admin_save_error'));
+        }
+        setSaving(false);
+    };
+
+    const handleDelete = async (item) => {
+        try {
+            await API.delete(`/admin/items/${item.id}`);
+            setConfirmDelete(null);
+            await fetchItems();
+        } catch (err) {
+            console.error(err);
+            alert(t('admin_delete_error'));
+        }
+    };
+
+    const filtered = items.filter(item => {
+        const matchSearch = item.title?.toLowerCase().includes(search.toLowerCase());
+        const matchCat = filterCat === "Все" || item.category === filterCat;
+        return matchSearch && matchCat;
+    });
+
+    if (loading) {
+        return <div className="admin-loading"><div className="loading-spinner"></div><span>{t('loading')}</span></div>;
+    }
+
+    return (
+        <div>
+            <div className="admin-page-header">
+                <h1>{t('admin_content')}</h1>
+                <p>{t('admin_content_desc')}</p>
+            </div>
+
+            <div className="admin-table-container">
+                <div className="admin-table-toolbar">
+                    <div className="admin-search">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input placeholder={t('admin_search_content')} value={search} onChange={e => setSearch(e.target.value)} />
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <div className="admin-filter-tabs">
+                            {CATEGORIES.map(cat => (
+                                <button key={cat} className={`admin-filter-tab ${filterCat === cat ? 'active' : ''}`}
+                                    onClick={() => setFilterCat(cat)}>{cat}</button>
+                            ))}
+                        </div>
+                        <button className="admin-btn admin-btn-primary" onClick={openCreate}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            {t('admin_add_item')}
+                        </button>
+                    </div>
+                </div>
+
+                <table className="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>{t('admin_col_title')}</th>
+                            <th>{t('admin_col_category')}</th>
+                            <th>{t('admin_col_genre')}</th>
+                            <th>{t('admin_col_actions')}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filtered.map(item => (
+                            <tr key={item.id}>
+                                <td style={{ color: 'var(--text-secondary)', fontSize: '0.82rem' }}>{item.id}</td>
+                                <td>
+                                    <div className="admin-item-cell">
+                                        {item.image && <img src={item.image} alt="" className="admin-item-poster" />}
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
+                                            <span>{item.title}</span>
+                                            {item.is_featured && <span className="admin-badge" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24', fontSize: '0.65rem' }}>★ Featured</span>}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span className="admin-badge admin-badge-category">{item.category}</span></td>
+                                <td style={{ color: 'var(--text-secondary)' }}>{item.genre}</td>
+                                <td>
+                                    <div className="admin-actions">
+                                        <button className="admin-btn admin-btn-sm admin-btn-ghost" onClick={() => openEdit(item)}>
+                                            {t('admin_edit')}
+                                        </button>
+                                        <button className="admin-btn admin-btn-sm admin-btn-danger" onClick={() => setConfirmDelete(item)}>
+                                            {t('delete_btn')}
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+                {filtered.length === 0 && <div className="admin-empty"><p>{t('admin_no_content')}</p></div>}
+            </div>
+
+            {/* Create / Edit Modal */}
+            {showModal && (
+                <div className="admin-modal-overlay" onClick={() => setShowModal(false)}>
+                    <div className="admin-modal" onClick={e => e.stopPropagation()}>
+                        <h2>{editItem ? t('admin_edit_item') : t('admin_add_item')}</h2>
+                        <p>{editItem ? t('admin_edit_item_desc') : t('admin_add_item_desc')}</p>
+
+                        <div className="admin-form-row">
+                            <div className="admin-form-group">
+                                <label className="admin-form-label">{t('admin_col_category')} *</label>
+                                <select className="admin-form-input admin-form-select" value={form.category}
+                                    onChange={e => setForm({...form, category: e.target.value})}>
+                                    <option value="Фильмы">Фильмы</option>
+                                    <option value="Сериалы">Сериалы</option>
+                                    <option value="Книги">Книги</option>
+                                    <option value="Музыка">Музыка</option>
+                                </select>
+                            </div>
+                            <div className="admin-form-group">
+                                <label className="admin-form-label">{t('admin_col_genre')} *</label>
+                                <input className="admin-form-input" value={form.genre}
+                                    onChange={e => setForm({...form, genre: e.target.value})} placeholder="Sci-Fi, Drama..." />
+                            </div>
+                        </div>
+
+                        <div className="admin-form-group">
+                            <label className="admin-form-label">{t('admin_col_title')} (RU/EN) *</label>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <input className="admin-form-input" value={form.title}
+                                    onChange={e => setForm({...form, title: e.target.value})} placeholder="Interstellar" style={{ flex: 1 }} />
+                                <button className="admin-btn admin-btn-primary" onClick={handleAIFill} disabled={aiLoading} style={{ background: 'linear-gradient(135deg, #a855f7, #ec4899)' }}>
+                                    {aiLoading ? "Загрузка..." : "✨ Сгенерировать ИИ"}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="admin-form-group">
+                            <label className="admin-form-label">{t('admin_desc_ru')}</label>
+                            <textarea className="admin-form-input admin-form-textarea" value={form.description_ru}
+                                onChange={e => setForm({...form, description_ru: e.target.value})} />
+                        </div>
+                        <div className="admin-form-group">
+                            <label className="admin-form-label">{t('admin_desc_en')}</label>
+                            <textarea className="admin-form-input admin-form-textarea" value={form.description_en}
+                                onChange={e => setForm({...form, description_en: e.target.value})} />
+                        </div>
+                        <div className="admin-form-group">
+                            <label className="admin-form-label">{t('admin_desc_kz')}</label>
+                            <textarea className="admin-form-input admin-form-textarea" value={form.description_kz}
+                                onChange={e => setForm({...form, description_kz: e.target.value})} />
+                        </div>
+
+                        <div className="admin-form-group">
+                            <label className="admin-form-label">{t('admin_image_url')}</label>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <input className="admin-form-input" value={form.image}
+                                    onChange={e => setForm({...form, image: e.target.value})} placeholder="https://..." style={{ flex: 1 }} />
+                                <label className="admin-btn admin-btn-ghost" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                                    {uploading ? "..." : "Загрузить"}
+                                    <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} disabled={uploading} />
+                                </label>
+                            </div>
+                        </div>
+
+                        {(form.category === "Фильмы" || form.category === "Сериалы") && (
+                            <div className="admin-form-group">
+                                <label className="admin-form-label">{t('admin_trailer_url')}</label>
+                                <input className="admin-form-input" value={form.trailer_url}
+                                    onChange={e => setForm({...form, trailer_url: e.target.value})} placeholder="https://www.youtube.com/embed/..." />
+                            </div>
+                        )}
+
+                        {form.category === "Музыка" && (
+                            <>
+                                <div className="admin-form-group">
+                                    <label className="admin-form-label">{t('admin_artist')}</label>
+                                    <input className="admin-form-input" value={form.artist}
+                                        onChange={e => setForm({...form, artist: e.target.value})} />
+                                </div>
+                                <div className="admin-form-group">
+                                    <label className="admin-form-label">{t('admin_preview_url')}</label>
+                                    <input className="admin-form-input" value={form.preview_url}
+                                        onChange={e => setForm({...form, preview_url: e.target.value})} />
+                                </div>
+                            </>
+                        )}
+                        
+                        <div className="admin-form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '16px' }}>
+                            <input type="checkbox" id="is_featured" checked={form.is_featured} 
+                                onChange={e => setForm({...form, is_featured: e.target.checked})} 
+                                style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
+                            <label htmlFor="is_featured" className="admin-form-label" style={{ margin: 0, cursor: 'pointer', color: 'var(--text-primary)' }}>
+                                Показывать в главном слайдере на главной странице (Featured)
+                            </label>
+                        </div>
+
+                        <div className="admin-modal-actions">
+                            <button className="admin-btn admin-btn-ghost" onClick={() => setShowModal(false)}>{t('admin_cancel')}</button>
+                            <button className="admin-btn admin-btn-primary" onClick={handleSave} disabled={saving}>
+                                {saving ? t('saving') : t('admin_save')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Confirm */}
+            {confirmDelete && (
+                <div className="admin-modal-overlay" onClick={() => setConfirmDelete(null)}>
+                    <div className="admin-modal" onClick={e => e.stopPropagation()}>
+                        <h2>{t('admin_confirm_title')}</h2>
+                        <p>{t('admin_confirm_delete_item')}<br/><strong>{confirmDelete.title}</strong></p>
+                        <div className="admin-modal-actions">
+                            <button className="admin-btn admin-btn-ghost" onClick={() => setConfirmDelete(null)}>{t('admin_cancel')}</button>
+                            <button className="admin-btn admin-btn-danger" onClick={() => handleDelete(confirmDelete)}>{t('delete_btn')}</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default AdminContent;

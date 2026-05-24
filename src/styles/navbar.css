@@ -1,0 +1,203 @@
+/* src/styles/navbar.css */
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: rgba(6, 8, 15, 0.6);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+[data-theme="light"] .navbar {
+    background: rgba(255, 255, 255, 0.75);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.navbar-container {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 32px;
+    height: 76px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.navbar-logo {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    margin-right: 24px;
+}
+
+.navbar-logo-svg {
+    display: block;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.navbar-logo:hover .navbar-logo-svg {
+    transform: scale(1.04);
+}
+
+.navbar-links {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex: 1;
+    justify-content: center;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 12px;
+    position: relative;
+}
+
+.nav-link svg {
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+.nav-link:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="light"] .nav-link:hover {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.nav-link:hover svg {
+    transform: translateY(-1px);
+}
+
+.nav-link.active {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.08);
+    font-weight: 600;
+}
+
+[data-theme="light"] .nav-link.active {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+.nav-link.active svg {
+    color: var(--accent-light);
+}
+
+.navbar-auth {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-left: 24px;
+}
+
+.nav-btn {
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+}
+
+.nav-btn svg {
+    flex-shrink: 0;
+}
+
+/* For icon-only buttons like the Bell */
+.nav-btn-icon {
+    padding: 10px;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-btn-icon:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="light"] .nav-btn-icon:hover {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+.nav-btn-outline {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="light"] .nav-btn-outline {
+    background: transparent;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.nav-btn-outline:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="light"] .nav-btn-outline:hover {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+.nav-btn-primary {
+    background: var(--gradient-primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.nav-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+}
+
+@media (max-width: 992px) {
+    .nav-link span {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar-container {
+        height: 60px;
+        padding: 0 16px;
+    }
+    .navbar-links {
+        gap: 4px;
+    }
+    .nav-link {
+        padding: 8px 10px;
+    }
+    .nav-btn span {
+        display: none;
+    }
+    .nav-btn {
+        padding: 8px 12px;
+    }
+    .navbar-logo-svg {
+        width: 120px;
+    }
+}

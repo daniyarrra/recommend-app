@@ -1,0 +1,103 @@
+/* src/styles/live-toast.css */
+.live-toast-container {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    pointer-events: none;
+}
+
+.live-toast {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 16px 20px;
+    width: 320px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    pointer-events: auto;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.live-toast:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 45px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(96, 165, 250, 0.3);
+}
+
+.live-toast::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--gradient-primary);
+}
+
+.toast-icon-wrapper {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: rgba(96, 165, 250, 0.15);
+    color: #60a5fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.live-toast.success .toast-icon-wrapper {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    background-image: var(--gradient-green);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.live-toast.info .toast-icon-wrapper {
+    background: rgba(139, 92, 246, 0.15);
+    color: #8b5cf6;
+}
+
+.toast-content {
+    flex: 1;
+}
+
+.toast-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.toast-message {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.toast-close {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 4px;
+    cursor: pointer;
+    transition: color 0.2s;
+    display: flex;
+}
+
+.toast-close:hover {
+    color: var(--text-primary);
+}
+
+/* Animations from framer-motion will handle enter/exit, but we can add keyframes if needed */

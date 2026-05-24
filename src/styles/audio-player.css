@@ -1,0 +1,272 @@
+/* ── Custom Audio Player ── */
+.custom-audio-player {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(59, 130, 246, 0.08));
+    border: 1px solid rgba(139, 92, 246, 0.15);
+    border-radius: 14px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: all 0.3s ease;
+}
+
+.custom-audio-player:hover {
+    border-color: rgba(139, 92, 246, 0.3);
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.18), rgba(59, 130, 246, 0.12));
+    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.1);
+}
+
+/* ── Large variant (detail page) ── */
+.custom-audio-player.audio-large {
+    padding: 14px 20px;
+    border-radius: 18px;
+    gap: 14px;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.06));
+    border: 1px solid rgba(139, 92, 246, 0.12);
+}
+
+.custom-audio-player.audio-large:hover {
+    box-shadow: 0 8px 32px rgba(139, 92, 246, 0.15);
+}
+
+/* ── Play Button ── */
+.audio-play-btn {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.35);
+    padding: 0;
+}
+
+.audio-play-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 18px rgba(139, 92, 246, 0.5);
+}
+
+.audio-play-btn:active {
+    transform: scale(0.95);
+}
+
+.audio-play-btn.playing {
+    background: linear-gradient(135deg, #6366f1, #3b82f6);
+    animation: pulseBtn 2s ease-in-out infinite;
+}
+
+/* Large play button */
+.audio-play-btn-lg {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+}
+
+.audio-play-btn-lg svg {
+    width: 22px;
+    height: 22px;
+}
+
+@keyframes pulseBtn {
+    0%, 100% { box-shadow: 0 4px 12px rgba(139, 92, 246, 0.35); }
+    50% { box-shadow: 0 4px 20px rgba(99, 102, 241, 0.6); }
+}
+
+.audio-play-btn svg {
+    transition: transform 0.2s ease;
+}
+
+/* ── Track Info ── */
+.audio-track-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.audio-large .audio-track-info {
+    gap: 6px;
+}
+
+/* ── Progress Bar ── */
+.audio-progress-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 3px;
+    cursor: pointer;
+    position: relative;
+    overflow: visible;
+    transition: height 0.2s ease;
+}
+
+.audio-progress-bar:hover {
+    height: 8px;
+}
+
+.audio-large .audio-progress-bar {
+    height: 8px;
+}
+
+.audio-large .audio-progress-bar:hover {
+    height: 10px;
+}
+
+.audio-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #8b5cf6, #6366f1, #3b82f6);
+    border-radius: 3px;
+    transition: width 0.1s linear;
+    position: relative;
+}
+
+.audio-progress-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent 80%, rgba(255, 255, 255, 0.3));
+    border-radius: 3px;
+}
+
+.audio-progress-thumb {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    width: 12px;
+    height: 12px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 0 6px rgba(139, 92, 246, 0.5);
+    transition: transform 0.2s ease;
+}
+
+.audio-progress-bar:hover .audio-progress-thumb {
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.audio-large .audio-progress-thumb {
+    width: 14px;
+    height: 14px;
+}
+
+/* ── Time Display ── */
+.audio-time {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    opacity: 0.6;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+}
+
+.audio-large .audio-time {
+    font-size: 0.75rem;
+    opacity: 0.7;
+}
+
+/* ── Volume Control ── */
+.audio-volume-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+}
+
+.audio-volume-btn {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    padding: 0;
+}
+
+.audio-volume-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text-primary);
+    transform: scale(1.08);
+}
+
+.audio-large .audio-volume-btn {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+}
+
+/* Volume slider container */
+.audio-volume-slider-container {
+    width: 0;
+    overflow: hidden;
+    transition: width 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+    opacity: 0;
+    display: flex;
+    align-items: center;
+}
+
+.audio-volume-slider-container.visible {
+    width: 80px;
+    opacity: 1;
+}
+
+.audio-large .audio-volume-slider-container.visible {
+    width: 100px;
+}
+
+/* Volume slider track */
+.audio-volume-slider {
+    width: 100%;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    cursor: pointer;
+    position: relative;
+    transition: height 0.15s ease;
+}
+
+.audio-volume-slider:hover {
+    height: 7px;
+}
+
+.audio-volume-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #6366f1, #818cf8);
+    border-radius: 3px;
+    transition: width 0.05s linear;
+}
+
+.audio-volume-thumb {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    width: 11px;
+    height: 11px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 0 4px rgba(99, 102, 241, 0.5);
+    transition: transform 0.2s ease;
+}
+
+.audio-volume-slider:hover .audio-volume-thumb {
+    transform: translate(-50%, -50%) scale(1);
+}
