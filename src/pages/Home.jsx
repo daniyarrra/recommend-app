@@ -45,18 +45,25 @@ const Home = () => {
 
     const availableGenres = [t('all_genres'), ...new Set(items.filter(item => item.category === "Фильмы" || item.category === "Сериалы" || item.category === "Movies" || item.category === "TV Shows").map(item => item.genre))].filter(Boolean);
 
-    // Full filter
-    const filteredItems = items.filter(item => {
-        const isMovieOrTV = item.category === "Фильмы" || item.category === "Сериалы" || item.category === "Movies" || item.category === "TV Shows";
+    const movies = items.filter(item => item.category === "Фильмы" || item.category === "Movies");
+    const series = items.filter(item => item.category === "Сериалы" || item.category === "TV Shows" || item.category === "TV Series");
+
+    const filteredMovies = movies.filter(item => {
         const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesGenre = activeGenre === "all" || activeGenre === t('all_genres') || item.genre === activeGenre;
-        return isMovieOrTV && matchesSearch && matchesGenre;
+        return matchesSearch && matchesGenre;
     });
 
-    const moviesAndTvItems = items.filter(item => item.category === "Фильмы" || item.category === "Сериалы" || item.category === "Movies" || item.category === "TV Shows");
+    const filteredSeries = series.filter(item => {
+        const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesGenre = activeGenre === "all" || activeGenre === t('all_genres') || item.genre === activeGenre;
+        return matchesSearch && matchesGenre;
+    });
+
+    const moviesAndTvItems = items.filter(item => item.category === "Фильмы" || item.category === "Сериалы" || item.category === "Movies" || item.category === "TV Shows" || item.category === "TV Series");
     const featuredItems = moviesAndTvItems.filter(item => item.is_featured);
     
-    // Всегда показываем 5 фильмов в верхнем слайдере
+    // Всегда показываем 5 фильмов/сериалов в верхнем слайдере
     let sliderItems = [...featuredItems];
     if (sliderItems.length < 5) {
         const remaining = moviesAndTvItems.filter(item => !sliderItems.find(f => f.id === item.id));
@@ -81,7 +88,6 @@ const Home = () => {
                     />
                 </div>
 
-
                 {availableGenres.length > 1 && (
                     <div className="genre-tags">
                         {availableGenres.map(genre => (
@@ -98,20 +104,49 @@ const Home = () => {
             </div>
 
             {loading ? (
-                <Carousel>
-                    {[...Array(10)].map((_, i) => <SkeletonCard key={i} />)}
-                </Carousel>
-            ) : filteredItems.length > 0 ? (
-                <Carousel>
-                    {filteredItems.map(item => (
-                        <ItemCard key={item.id} item={item} />
-                    ))}
-                </Carousel>
+                <>
+                    <h2 className="section-title" style={{ marginTop: '30px', marginBottom: '20px', fontSize: '1.5rem', color: 'var(--text-primary)', fontWeight: 'bold' }}>
+                        {language === 'ru' ? 'Фильмы' : 'Movies'}
+                    </h2>
+                    <Carousel>
+                        {[...Array(10)].map((_, i) => <SkeletonCard key={i} />)}
+                    </Carousel>
+                </>
             ) : (
-                <div className="empty-state-container">
-                    <EmptyIcon />
-                    <p className="empty-state-text">{t('nothing_found')}</p>
-                </div>
+                <>
+                    {filteredMovies.length > 0 && (
+                        <>
+                            <h2 className="section-title" style={{ marginTop: '30px', marginBottom: '20px', fontSize: '1.5rem', color: 'var(--text-primary)', fontWeight: 'bold' }}>
+                                {language === 'ru' ? 'Фильмы' : 'Movies'}
+                            </h2>
+                            <Carousel>
+                                {filteredMovies.map(item => (
+                                    <ItemCard key={item.id} item={item} />
+                                ))}
+                            </Carousel>
+                        </>
+                    )}
+                    
+                    {filteredSeries.length > 0 && (
+                        <>
+                            <h2 className="section-title" style={{ marginTop: '40px', marginBottom: '20px', fontSize: '1.5rem', color: 'var(--text-primary)', fontWeight: 'bold' }}>
+                                {language === 'ru' ? 'Сериалы' : 'TV Series'}
+                            </h2>
+                            <Carousel>
+                                {filteredSeries.map(item => (
+                                    <ItemCard key={item.id} item={item} />
+                                ))}
+                            </Carousel>
+                        </>
+                    )}
+
+                    {filteredMovies.length === 0 && filteredSeries.length === 0 && (
+                        <div className="empty-state-container">
+                            <EmptyIcon />
+                            <p className="empty-state-text">{t('nothing_found')}</p>
+                        </div>
+                    )}
+                </>
             )}
             </div>
         </PageTransition>

@@ -181,7 +181,10 @@ export const translations = {
     admin_artist: "Исполнитель",
     admin_search_reviews: "Поиск по отзывам...",
     admin_reviews_total: "отзывов",
-    admin_no_reviews: "Отзывы не найдены"
+    admin_no_reviews: "Отзывы не найдены",
+    viewing_now: "смотрят сейчас",
+    director: "Режиссер",
+    cast: "В ролях"
   },
   en: {
     // AI
@@ -363,7 +366,10 @@ export const translations = {
     admin_artist: "Artist",
     admin_search_reviews: "Search reviews...",
     admin_reviews_total: "reviews",
-    admin_no_reviews: "No reviews found"
+    admin_no_reviews: "No reviews found",
+    viewing_now: "viewing now",
+    director: "Director",
+    cast: "Cast"
   },
   kz: {
     // AI
@@ -545,7 +551,10 @@ export const translations = {
     admin_artist: "Орындаушы",
     admin_search_reviews: "Пікірлерді іздеу...",
     admin_reviews_total: "пікір",
-    admin_no_reviews: "Пікірлер табылмады"
+    admin_no_reviews: "Пікірлер табылмады",
+    viewing_now: "қазір қарауда",
+    director: "Режиссер",
+    cast: "Рөлдерде"
   }
 };
 
@@ -563,8 +572,18 @@ export const LanguageProvider = ({ children }) => {
     return translations[language]?.[key] || translations['ru']?.[key] || key;
   };
 
+  const translateCategory = (cat) => {
+    if (!cat) return cat;
+    const lowerCat = cat.toLowerCase();
+    if (lowerCat.includes("фильм") || lowerCat.includes("movi")) return t('cat_movies');
+    if (lowerCat.includes("сериал") || lowerCat.includes("tv")) return t('cat_tv');
+    if (lowerCat.includes("книг") || lowerCat.includes("book")) return t('cat_books');
+    if (lowerCat.includes("музык") || lowerCat.includes("music")) return t('cat_music');
+    return cat;
+  };
+
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t, translateCategory }}>
       {children}
     </LanguageContext.Provider>
   );

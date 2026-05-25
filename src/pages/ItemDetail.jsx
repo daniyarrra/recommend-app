@@ -55,7 +55,7 @@ const PlayIcon = () => (
 );
 
 const ItemDetail = () => {
-    const { t, language } = useLanguage();
+    const { t, language, translateCategory } = useLanguage();
     const { id } = useParams();
     const navigate = useNavigate();
     const [item, setItem] = useState(null);
@@ -260,11 +260,11 @@ const ItemDetail = () => {
                         <h1 className="detail-title">{item.title}</h1>
                         <div className="detail-meta">
                             <span className="detail-genre">{item.genre}</span>
-                            <span>{item.category}</span>
+                            <span>{translateCategory(item.category)}</span>
                             {viewers > 1 && (
                                 <span style={{ marginLeft: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#10b981', fontSize: '0.85rem', fontWeight: '500', background: 'rgba(16, 185, 129, 0.1)', padding: '2px 8px', borderRadius: '12px' }}>
                                     <span style={{ width: '6px', height: '6px', background: '#10b981', borderRadius: '50%', boxShadow: '0 0 8px #10b981' }}></span>
-                                    {viewers} {language === 'ru' ? 'смотрят сейчас' : 'viewing now'}
+                                    {viewers} {t('viewing_now')}
                                 </span>
                             )}
                         </div>
@@ -277,7 +277,7 @@ const ItemDetail = () => {
                             <div className="detail-people-section" style={{ marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                 {item.director?.length > 0 && (
                                     <div className="people-group">
-                                        <h3 style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginBottom: '12px' }}>{language === 'ru' ? 'Режиссер' : 'Director'}</h3>
+                                        <h3 style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginBottom: '12px' }}>{t('director')}</h3>
                                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
                                             {Array.isArray(item.director) ? item.director.map((p, i) => (
                                                 <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', width: '80px', textAlign: 'center' }}>
@@ -292,7 +292,7 @@ const ItemDetail = () => {
                                 )}
                                 {item.cast?.length > 0 && (
                                     <div className="people-group">
-                                        <h3 style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginBottom: '12px' }}>{language === 'ru' ? 'В ролях' : 'Cast'}</h3>
+                                        <h3 style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginBottom: '12px' }}>{t('cast')}</h3>
                                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
                                             {Array.isArray(item.cast) ? item.cast.map((p, i) => (
                                                 <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', width: '80px', textAlign: 'center' }}>
