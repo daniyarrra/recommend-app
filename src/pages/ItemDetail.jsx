@@ -324,15 +324,23 @@ const ItemDetail = () => {
                                     <PlayIcon />
                                     {t('watch_trailer')}
                                 </p>
-                                <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: '12px' }}>
-                                    <iframe 
-                                        src={item.trailer_url} 
-                                        frameBorder="0" 
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                        allowFullScreen
-                                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-                                        title="Trailer"
-                                    ></iframe>
+                                <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: '12px', background: '#000' }}>
+                                    {item.trailer_url.match(/\.(mp4|m4v)$/i) || item.trailer_url.includes('video-ssl.itunes') ? (
+                                        <video 
+                                            src={item.trailer_url} 
+                                            controls 
+                                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                                        />
+                                    ) : (
+                                        <iframe 
+                                            src={item.trailer_url} 
+                                            frameBorder="0" 
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                            allowFullScreen
+                                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                                            title="Trailer"
+                                        ></iframe>
+                                    )}
                                 </div>
                             </div>
                         )}
