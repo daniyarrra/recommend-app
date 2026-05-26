@@ -54,7 +54,7 @@ const Books = () => {
             console.error(err);
             setLoading(false);
         });
-    }, [language, t]);
+    }, [language, t, translateCategory]);
 
     const filteredItems = items.filter(item => 
         item.title.toLowerCase().includes(searchQuery.toLowerCase())
