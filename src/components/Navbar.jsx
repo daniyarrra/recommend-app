@@ -116,7 +116,7 @@ const Navbar = () => {
     const [unreadCount, setUnreadCount] = useState(0);
     const [showNotifications, setShowNotifications] = useState(false);
     const [theme, setTheme] = useState(document.documentElement.getAttribute("data-theme") || "dark");
-    const { t } = useLanguage();
+    const { t, language, setLanguage } = useLanguage();
 
     useEffect(() => {
         const checkSession = async (session) => {
@@ -181,27 +181,12 @@ const Navbar = () => {
         <nav className="navbar">
             <div className="navbar-container">
                 <Link to="/" className="navbar-logo">
-                    <svg className="navbar-logo-svg" width="160" height="36" viewBox="0 0 160 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <linearGradient id="logoGrad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
-                                <stop offset="0%" stopColor="#60a5fa"/>
-                                <stop offset="100%" stopColor="#a855f7"/>
-                            </linearGradient>
-                            <linearGradient id="textGrad" x1="40" y1="0" x2="160" y2="36" gradientUnits="userSpaceOnUse">
-                                <stop offset="0%" stopColor="#60a5fa"/>
-                                <stop offset="50%" stopColor="#818cf8"/>
-                                <stop offset="100%" stopColor="#a855f7"/>
-                            </linearGradient>
-                        </defs>
-                        {/* Icon mark — rounded square with play triangle */}
-                        <rect x="1" y="2" width="32" height="32" rx="8" fill="url(#logoGrad)" opacity="0.15"/>
-                        <rect x="1" y="2" width="32" height="32" rx="8" stroke="url(#logoGrad)" strokeWidth="2" fill="none"/>
-                        <polygon points="14,10 14,26 26,18" fill="url(#logoGrad)"/>
-                        {/* Wordmark */}
-                        <text x="40" y="25" fontFamily="Inter, sans-serif" fontWeight="800" fontSize="20" fill="url(#textGrad)">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <img src="/logo.png" alt="RecMedia Logo" style={{ height: '36px', width: '36px', borderRadius: '50%', objectFit: 'cover' }} />
+                        <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: '20px', background: 'linear-gradient(to right, #60a5fa, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                             RecMedia
-                        </text>
-                    </svg>
+                        </span>
+                    </div>
                 </Link>
 
                 <div className="navbar-links">
@@ -233,7 +218,18 @@ const Navbar = () => {
                                     <span>{t('nav_admin')}</span>
                                 </Link>
                             )}
-                            <button onClick={toggleTheme} className="nav-btn-icon" style={{ marginLeft: 'auto' }} title="Toggle Theme">
+                            <select 
+                                value={language} 
+                                onChange={(e) => setLanguage(e.target.value)}
+                                className="nav-lang-select"
+                                style={{ marginLeft: 'auto' }}
+                                title={t('language')}
+                            >
+                                <option value="ru">RU</option>
+                                <option value="en">EN</option>
+                                <option value="kz">KZ</option>
+                            </select>
+                            <button onClick={toggleTheme} className="nav-btn-icon" title="Toggle Theme">
                                 {theme === 'dark' ? <IconSun /> : <IconMoon />}
                             </button>
                             <div style={{ position: 'relative' }}>
@@ -273,7 +269,18 @@ const Navbar = () => {
                         </>
                     ) : (
                         <>
-                            <button onClick={toggleTheme} className="nav-btn-icon" style={{ marginLeft: 'auto' }} title="Toggle Theme">
+                            <select 
+                                value={language} 
+                                onChange={(e) => setLanguage(e.target.value)}
+                                className="nav-lang-select"
+                                style={{ marginLeft: 'auto' }}
+                                title={t('language')}
+                            >
+                                <option value="ru">RU</option>
+                                <option value="en">EN</option>
+                                <option value="kz">KZ</option>
+                            </select>
+                            <button onClick={toggleTheme} className="nav-btn-icon" title="Toggle Theme">
                                 {theme === 'dark' ? <IconSun /> : <IconMoon />}
                             </button>
                             <Link to="/login" className="nav-btn nav-btn-outline">

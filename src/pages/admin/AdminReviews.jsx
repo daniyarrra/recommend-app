@@ -70,8 +70,13 @@ const AdminReviews = () => {
 
     const handleDelete = async (review) => {
         try {
-            await supabase.from("ratings").delete().eq("id", review.id);
-            setReviews(prev => prev.filter(r => r.id !== review.id));
+            const { error } = await supabase.rpc('admin_delete_review', { target_review_id: review.id });
+            if (!error) {
+                setReviews(prev => prev.filter(r => r.id !== review.id));
+            } else {
+                console.error("Delete review error:", error);
+                alert("Ошибка при удалении отзыва");
+            }
             setConfirmDelete(null);
         } catch (err) {
             console.error(err);

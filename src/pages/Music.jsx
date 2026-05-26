@@ -39,7 +39,7 @@ const EmptyIcon = () => (
 );
 
 const Music = () => {
-    const { t, language } = useLanguage();
+    const { t, language, translateCategory } = useLanguage();
     const [items, setItems] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(true);
@@ -47,7 +47,7 @@ const Music = () => {
     useEffect(() => {
         setLoading(true);
         API.get(`/items?lang=${language}`).then(res => {
-            const music = res.data.filter(item => item.category === t('cat_music'));
+            const music = res.data.filter(item => translateCategory(item.category) === t('cat_music'));
             setItems(music);
             setLoading(false);
         }).catch(err => {

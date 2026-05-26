@@ -26,7 +26,7 @@ const EmptyIcon = () => (
 );
 
 const Home = () => {
-    const { t, language } = useLanguage();
+    const { t, language, translateCategory } = useLanguage();
     const [items, setItems] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [activeGenre, setActiveGenre] = useState("all");
@@ -43,10 +43,13 @@ const Home = () => {
         });
     }, [language]);
 
-    const availableGenres = [t('all_genres'), ...new Set(items.filter(item => item.category === "Фильмы" || item.category === "Сериалы" || item.category === "Movies" || item.category === "TV Shows").map(item => item.genre))].filter(Boolean);
+    const availableGenres = [t('all_genres'), ...new Set(items.filter(item => {
+        const cat = translateCategory(item.category);
+        return cat === t('cat_movies') || cat === t('cat_tv');
+    }).map(item => item.genre))].filter(Boolean);
 
-    const movies = items.filter(item => item.category === "Фильмы" || item.category === "Movies");
-    const series = items.filter(item => item.category === "Сериалы" || item.category === "TV Shows" || item.category === "TV Series");
+    const movies = items.filter(item => translateCategory(item.category) === t('cat_movies'));
+    const series = items.filter(item => translateCategory(item.category) === t('cat_tv'));
 
     const filteredMovies = movies.filter(item => {
         const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase());
@@ -60,7 +63,10 @@ const Home = () => {
         return matchesSearch && matchesGenre;
     });
 
-    const moviesAndTvItems = items.filter(item => item.category === "Фильмы" || item.category === "Сериалы" || item.category === "Movies" || item.category === "TV Shows" || item.category === "TV Series");
+    const moviesAndTvItems = items.filter(item => {
+        const cat = translateCategory(item.category);
+        return cat === t('cat_movies') || cat === t('cat_tv');
+    });
     const featuredItems = moviesAndTvItems.filter(item => item.is_featured);
     
     // Всегда показываем 5 фильмов/сериалов в верхнем слайдере
@@ -106,7 +112,7 @@ const Home = () => {
             {loading ? (
                 <>
                     <h2 className="section-title" style={{ marginTop: '30px', marginBottom: '20px', fontSize: '1.5rem', color: 'var(--text-primary)', fontWeight: 'bold' }}>
-                        {language === 'ru' ? 'Фильмы' : 'Movies'}
+                        {t('cat_movies')}
                     </h2>
                     <Carousel>
                         {[...Array(10)].map((_, i) => <SkeletonCard key={i} />)}
@@ -117,7 +123,7 @@ const Home = () => {
                     {filteredMovies.length > 0 && (
                         <>
                             <h2 className="section-title" style={{ marginTop: '30px', marginBottom: '20px', fontSize: '1.5rem', color: 'var(--text-primary)', fontWeight: 'bold' }}>
-                                {language === 'ru' ? 'Фильмы' : 'Movies'}
+                                {t('cat_movies')}
                             </h2>
                             <Carousel>
                                 {filteredMovies.map(item => (
@@ -130,7 +136,7 @@ const Home = () => {
                     {filteredSeries.length > 0 && (
                         <>
                             <h2 className="section-title" style={{ marginTop: '40px', marginBottom: '20px', fontSize: '1.5rem', color: 'var(--text-primary)', fontWeight: 'bold' }}>
-                                {language === 'ru' ? 'Сериалы' : 'TV Series'}
+                                {t('cat_tv')}
                             </h2>
                             <Carousel>
                                 {filteredSeries.map(item => (

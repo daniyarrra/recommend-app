@@ -153,6 +153,42 @@
     background: rgba(0, 0, 0, 0.06);
 }
 
+.nav-lang-select {
+    appearance: none;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    outline: none;
+    font-family: inherit;
+}
+
+[data-theme="light"] .nav-lang-select {
+    background: transparent;
+    border-color: rgba(0, 0, 0, 0.1);
+    color: var(--text-primary);
+}
+
+.nav-lang-select:hover, .nav-lang-select:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="light"] .nav-lang-select:hover, [data-theme="light"] .nav-lang-select:focus {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+.nav-lang-select option {
+    background: var(--bg-color);
+    color: var(--text-primary);
+}
+
 .nav-btn-outline {
     color: var(--text-primary);
     background: rgba(255, 255, 255, 0.03);
@@ -348,5 +384,10 @@
 
     .navbar-auth {
         gap: 6px;
+    }
+
+    .nav-lang-select {
+        padding: 6px 8px;
+        font-size: 0.75rem;
     }
 }

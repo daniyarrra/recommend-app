@@ -28,6 +28,18 @@ const Register = () => {
             
             if (error) throw error;
             
+            // Immediately create public profile with nickname
+            if (data?.user) {
+                await supabase.from('profiles').upsert({
+                    id: data.user.id,
+                    email: email,
+                    nickname: nickname,
+                    is_public: true,
+                    avatar_url: null,
+                    bio: ''
+                });
+            }
+            
             if (data?.session) {
                 navigate("/");
             } else {

@@ -39,7 +39,7 @@ const EmptyIcon = () => (
 );
 
 const Books = () => {
-    const { t, language } = useLanguage();
+    const { t, language, translateCategory } = useLanguage();
     const [items, setItems] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(true);
@@ -47,7 +47,7 @@ const Books = () => {
     useEffect(() => {
         setLoading(true);
         API.get(`/items?lang=${language}`).then(res => {
-            const books = res.data.filter(item => item.category === t('cat_books'));
+            const books = res.data.filter(item => translateCategory(item.category) === t('cat_books'));
             setItems(books);
             setLoading(false);
         }).catch(err => {

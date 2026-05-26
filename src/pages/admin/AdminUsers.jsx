@@ -46,23 +46,36 @@ const AdminUsers = () => {
 
     const handleBan = async (user) => {
         const newVal = !user.is_banned;
-        await supabase.from("profiles").update({ is_banned: newVal }).eq("id", user.id);
-        setUsers(prev => prev.map(u => u.id === user.id ? { ...u, is_banned: newVal } : u));
+        const { error } = await supabase.rpc('admin_set_ban', { target_uid: user.id, ban_status: newVal });
+        if (!error) {
+            setUsers(prev => prev.map(u => u.id === user.id ? { ...u, is_banned: newVal } : u));
+        } else {
+            console.error("Ban error:", error);
+            alert("Ошибка при изменении статуса блокировки");
+        }
         setConfirmAction(null);
     };
 
     const handleToggleAdmin = async (user) => {
         const newVal = !user.is_admin;
-        await supabase.from("profiles").update({ is_admin: newVal }).eq("id", user.id);
-        setUsers(prev => prev.map(u => u.id === user.id ? { ...u, is_admin: newVal } : u));
+        const { error } = await supabase.rpc('admin_set_role', { target_uid: user.id, make_admin: newVal });
+        if (!error) {
+            setUsers(prev => prev.map(u => u.id === user.id ? { ...u, is_admin: newVal } : u));
+        } else {
+            console.error("Role error:", error);
+            alert("Ошибка при изменении роли");
+        }
         setConfirmAction(null);
     };
 
     const handleDelete = async (user) => {
-        await supabase.from("ratings").delete().eq("user_id", user.id);
-        await supabase.from("watchlist").delete().eq("user_id", user.id);
-        await supabase.from("profiles").delete().eq("id", user.id);
-        setUsers(prev => prev.filter(u => u.id !== user.id));
+        const { error } = await supabase.rpc('admin_delete_user', { target_uid: user.id });
+        if (!error) {
+            setUsers(prev => prev.filter(u => u.id !== user.id));
+        } else {
+            console.error("Delete user error:", error);
+            alert("Ошибка при удалении пользователя");
+        }
         setConfirmAction(null);
     };
 

@@ -145,7 +145,7 @@ const AudioPlayer = ({ src, variant = "compact" }) => {
             >
                 {isPlaying ? <PauseIcon /> : <PlayIcon />}
             </button>
-
+ 
             <div className="audio-track-info">
                 <div className="audio-progress-bar" onClick={handleProgressClick}>
                     <div 

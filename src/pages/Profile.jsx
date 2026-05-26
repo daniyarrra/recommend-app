@@ -46,7 +46,7 @@ const Profile = () => {
     const [activeFolder, setActiveFolder] = useState("all");
     const [folderAssignItem, setFolderAssignItem] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [isPublic, setIsPublic] = useState(false);
+    const [isPublic, setIsPublic] = useState(true);
     const [avatarUrl, setAvatarUrl] = useState(null);
     const [bio, setBio] = useState("");
     const [nickname, setNickname] = useState("");
@@ -80,10 +80,21 @@ const Profile = () => {
                     .eq("id", session.user.id)
                     .maybeSingle();
                 if (profileData) {
-                    setIsPublic(profileData.is_public);
+                    // If no profile row exists yet, is_public defaults to true
+                    setIsPublic(profileData.is_public ?? true);
                     setAvatarUrl(profileData.avatar_url);
                     if (profileData.bio) setBio(profileData.bio);
-                    if (profileData.nickname) setNickname(profileData.nickname);
+                    // Prioritize profile nickname, then user_metadata, then email prefix
+                    const resolvedNickname = profileData.nickname
+                        || session.user.user_metadata?.nickname
+                        || session.user.email.split('@')[0];
+                    setNickname(resolvedNickname);
+                } else {
+                    // New user without profile row — use metadata nickname
+                    const metaNickname = session.user.user_metadata?.nickname
+                        || session.user.email.split('@')[0];
+                    setNickname(metaNickname);
+                    setIsPublic(true);
                 }
 
                 // Watchlist с папками

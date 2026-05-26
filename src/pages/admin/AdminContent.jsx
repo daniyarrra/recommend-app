@@ -5,7 +5,7 @@ import { useLanguage } from "../../context/LanguageContext";
 const CATEGORIES = ["Все", "Фильмы", "Сериалы", "Книги", "Музыка"];
 
 const emptyItem = {
-    title: "", genre: "", category: "Фильмы",
+    title_ru: "", title_en: "", title_kz: "", genre: "", category: "Фильмы",
     description_ru: "", description_en: "", description_kz: "",
     image: "", trailer_url: "", preview_url: "", artist: "", is_featured: false,
     cast: [], director: []
@@ -43,13 +43,18 @@ const AdminContent = () => {
 
     const openEdit = (item) => {
         setEditItem(item);
+        const tObj = item.raw_title || item.title;
+        const dObj = item.raw_description || item.description;
+
         setForm({
-            title: item.title || "",
+            title_ru: typeof tObj === 'object' ? (tObj?.ru || "") : (tObj || ""),
+            title_en: typeof tObj === 'object' ? (tObj?.en || "") : "",
+            title_kz: typeof tObj === 'object' ? (tObj?.kz || "") : "",
             genre: item.genre || "",
             category: item.category || "Фильмы",
-            description_ru: typeof item.description === 'object' ? (item.description?.ru || "") : (item.description || ""),
-            description_en: typeof item.description === 'object' ? (item.description?.en || "") : "",
-            description_kz: typeof item.description === 'object' ? (item.description?.kz || "") : "",
+            description_ru: typeof dObj === 'object' ? (dObj?.ru || "") : (dObj || ""),
+            description_en: typeof dObj === 'object' ? (dObj?.en || "") : "",
+            description_kz: typeof dObj === 'object' ? (dObj?.kz || "") : "",
             image: item.image || "",
             trailer_url: item.trailer_url || "",
             preview_url: item.preview_url || "",
@@ -62,15 +67,18 @@ const AdminContent = () => {
     };
 
     const handleAIFill = async () => {
-        if (!form.title || !form.category) {
-            alert("Сначала введите название и выберите категорию");
+        if (!form.title_ru || !form.category) {
+            alert("Сначала введите название в поле (RU) и выберите категорию");
             return;
         }
         setAiLoading(true);
         try {
-            const res = await API.post("/admin/ai-fill", { title: form.title, category: form.category });
+            const res = await API.post("/admin/ai-fill", { title: form.title_ru, category: form.category });
             setForm(prev => ({
                 ...prev,
+                title_ru: res.data.title_ru || prev.title_ru,
+                title_en: res.data.title_en || prev.title_en,
+                title_kz: res.data.title_kz || prev.title_kz,
                 genre: res.data.genre || prev.genre,
                 description_ru: res.data.description_ru || prev.description_ru,
                 description_en: res.data.description_en || prev.description_en,
@@ -104,7 +112,7 @@ const AdminContent = () => {
     };
 
     const handleSave = async () => {
-        if (!form.title || !form.genre || !form.category) {
+        if (!form.title_ru || !form.genre || !form.category) {
             alert(t('admin_fill_required'));
             return;
         }
@@ -241,14 +249,24 @@ const AdminContent = () => {
                         </div>
 
                         <div className="admin-form-group">
-                            <label className="admin-form-label">{t('admin_col_title')} (RU/EN) *</label>
+                            <label className="admin-form-label">{t('admin_col_title')} (RU) *</label>
                             <div style={{ display: 'flex', gap: '8px' }}>
-                                <input className="admin-form-input" value={form.title}
-                                    onChange={e => setForm({...form, title: e.target.value})} placeholder="Interstellar" style={{ flex: 1 }} />
+                                <input className="admin-form-input" value={form.title_ru}
+                                    onChange={e => setForm({...form, title_ru: e.target.value})} placeholder="Интерстеллар" style={{ flex: 1 }} />
                                 <button className="admin-btn admin-btn-primary" onClick={handleAIFill} disabled={aiLoading} style={{ background: 'linear-gradient(135deg, #a855f7, #ec4899)' }}>
                                     {aiLoading ? "Загрузка..." : "✨ Сгенерировать ИИ"}
                                 </button>
                             </div>
+                        </div>
+                        <div className="admin-form-group">
+                            <label className="admin-form-label">{t('admin_col_title')} (EN)</label>
+                            <input className="admin-form-input" value={form.title_en}
+                                onChange={e => setForm({...form, title_en: e.target.value})} placeholder="Interstellar" />
+                        </div>
+                        <div className="admin-form-group">
+                            <label className="admin-form-label">{t('admin_col_title')} (KZ)</label>
+                            <input className="admin-form-input" value={form.title_kz}
+                                onChange={e => setForm({...form, title_kz: e.target.value})} placeholder="Интерстеллар" />
                         </div>
 
                         <div className="admin-form-group">
