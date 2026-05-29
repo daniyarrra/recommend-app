@@ -48,6 +48,7 @@ const AIChat = () => {
         const history = messages.map(m => ({ role: m.role, text: m.text }));
 
         setMessages(prev => [...prev, { role: "user", text: userMsg }]);
+        setIsLoading(true);
         try {
             // В режиме локальной разработки (npm start) идем на бэкенд, в продакшене (Vercel) - на Serverless функцию
             const isLocal = process.env.NODE_ENV === 'development';
@@ -59,19 +60,29 @@ const AIChat = () => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ message: userMsg, history: history })
             });
-            
+
             const data = await response.json();
+
+            if (!response.ok && !data.reply) {
+                throw new Error(response.status === 429
+                    ? (language === 'ru'
+                        ? "ИИ временно недоступен — исчерпан лимит запросов. Попробуйте позже."
+                        : "AI is temporarily unavailable — request limit exceeded.")
+                    : `HTTP ${response.status}`);
+            }
             
             setMessages(prev => [...prev, { 
                 role: "ai", 
-                text: data.reply, 
+                text: data.reply || (language === 'ru' ? "Не удалось получить ответ." : "Could not get a response."), 
                 items: data.items || []
             }]);
         } catch (error) {
             console.error("Chat API failed:", error);
             setMessages(prev => [...prev, { 
                 role: "ai", 
-                text: `Упс! Произошла ошибка: ${error.message}` 
+                text: language === 'ru'
+                    ? `Упс! ${error.message}`
+                    : `Oops! ${error.message}`
             }]);
         } finally {
             setIsLoading(false);
