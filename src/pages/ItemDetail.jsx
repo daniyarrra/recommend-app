@@ -17,7 +17,7 @@ const ArrowLeftIcon = () => (
 );
 
 const StarIcon = ({ filled, size = 16 }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? "#fbbf24" : "none"} stroke={filled ? "#fbbf24" : "#4b5563"} strokeWidth="1.5">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? "#fbbf24" : "none"} stroke={filled ? "#fbbf24" : "var(--text-secondary)"} strokeWidth="1.5">
         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
     </svg>
 );
@@ -346,7 +346,7 @@ const ItemDetail = () => {
                         )}
                         
                         <div className="detail-actions" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                            <Rating itemId={item.id} />
+                            <Rating itemId={item.id} onRatingSaved={fetchReviews} />
                             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                                 <button 
                                     className="btn-watchlist" 

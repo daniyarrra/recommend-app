@@ -50,16 +50,8 @@ const Profile = () => {
     const [avatarUrl, setAvatarUrl] = useState(null);
     const [bio, setBio] = useState("");
     const [nickname, setNickname] = useState("");
-    const [theme, setTheme] = useState(localStorage.getItem('app-theme') || 'dark');
     const navigate = useNavigate();
     const { t, language, setLanguage } = useLanguage();
-
-    const handleThemeToggle = () => {
-        const newTheme = theme === 'dark' ? 'light' : 'dark';
-        setTheme(newTheme);
-        document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('app-theme', newTheme);
-    };
 
     const [topGenres, setTopGenres] = useState([]);
     const [categoryCounts, setCategoryCounts] = useState({});
@@ -562,20 +554,7 @@ const Profile = () => {
                                 </select>
                             </div>
 
-                            <div className="settings-card">
-                                <div>
-                                    <h4>{t('light_theme')}</h4>
-                                    <p>{t('light_theme_desc')}</p>
-                                </div>
-                                <label className="settings-switch">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={theme === 'light'} 
-                                        onChange={handleThemeToggle} 
-                                    />
-                                    <span className="settings-slider"></span>
-                                </label>
-                            </div>
+
 
                             <div className="settings-card">
                                 <div>

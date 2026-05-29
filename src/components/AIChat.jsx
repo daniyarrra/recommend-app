@@ -42,11 +42,20 @@ const AIChat = () => {
 
         const userMsg = input.trim();
         setInput("");
+        
+        // Prepare history from existing messages (excluding the new user message we are about to add)
+        // We exclude the initial greeting if it's the only one, or keep it depending on preference.
+        // Let's send all messages that are in state.
+        const history = messages.map(m => ({ role: m.role, text: m.text }));
+
         setMessages(prev => [...prev, { role: "user", text: userMsg }]);
         setIsLoading(true);
 
         try {
-            const response = await API.post(`/api/chat?lang=${language}`, { message: userMsg });
+            const response = await API.post(`/api/chat?lang=${language}`, { 
+                message: userMsg,
+                history: history 
+            });
             setMessages(prev => [...prev, { 
                 role: "ai", 
                 text: response.data.reply, 
