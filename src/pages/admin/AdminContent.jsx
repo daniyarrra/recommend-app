@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import API from "../../services/api";
 import { useLanguage } from "../../context/LanguageContext";
+import { useCatalog, useInvalidateCatalog } from "../../hooks/useCatalog";
 
 const CATEGORIES = ["Все", "Фильмы", "Сериалы", "Книги", "Музыка"];
 
@@ -12,11 +13,11 @@ const emptyItem = {
 };
 
 const AdminContent = () => {
-    const { t } = useLanguage();
-    const [items, setItems] = useState([]);
+    const { t, language } = useLanguage();
+    const { data: items = [], isLoading: loading, refetch } = useCatalog(language);
+    const invalidateCatalog = useInvalidateCatalog();
     const [search, setSearch] = useState("");
     const [filterCat, setFilterCat] = useState("Все");
-    const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [editItem, setEditItem] = useState(null);
     const [form, setForm] = useState({ ...emptyItem });
@@ -25,15 +26,10 @@ const AdminContent = () => {
     const [aiLoading, setAiLoading] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState(null);
 
-    const fetchItems = async () => {
-        try {
-            const res = await API.get("/items");
-            setItems(res.data);
-        } catch (err) { console.error(err); }
-        setLoading(false);
+    const refreshCatalog = async () => {
+        await invalidateCatalog();
+        await refetch();
     };
-
-    useEffect(() => { fetchItems(); }, []);
 
     const openCreate = () => {
         setEditItem(null);
@@ -125,7 +121,7 @@ const AdminContent = () => {
                 await API.post("/admin/items", payload);
             }
             setShowModal(false);
-            await fetchItems();
+            await refreshCatalog();
         } catch (err) {
             console.error(err);
             alert(t('admin_save_error'));
@@ -137,7 +133,7 @@ const AdminContent = () => {
         try {
             await API.delete(`/admin/items/${item.id}`);
             setConfirmDelete(null);
-            await fetchItems();
+            await refreshCatalog();
         } catch (err) {
             console.error(err);
             alert(t('admin_delete_error'));

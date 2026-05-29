@@ -6,6 +6,7 @@ import SkeletonCard from "../components/SkeletonCard";
 import Carousel from "../components/Carousel";
 import PageTransition from "../components/PageTransition";
 import { useLanguage } from "../context/LanguageContext";
+import { useCatalog } from "../hooks/useCatalog";
 import "../styles/main.css";
 
 /* ── SVG Icons ── */
@@ -29,55 +30,53 @@ const EmptyIcon = () => (
 
 const Recommendations = () => {
     const { t, language } = useLanguage();
+    const { data: allItems = [], isLoading: catalogLoading } = useCatalog(language);
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        if (catalogLoading) {
+            return;
+        }
+
         let isMounted = true;
         setLoading(true);
 
         const fetchSmartRecommendations = async () => {
             try {
-                // 1. Check if user is logged in
                 const { data: { session } } = await supabase.auth.getSession();
-                
+
                 let liked_titles = [];
                 let watchlist_titles = [];
 
                 if (session?.user) {
-                    // Fetch all items to map IDs to Titles
-                    const { data: allItems } = await API.get(`/items?lang=${language}`);
-                    
-                    // Fetch highly rated items (>= 4 stars)
                     const { data: ratingsData } = await supabase
-                        .from('ratings')
-                        .select('item_id')
-                        .eq('user_id', session.user.id)
-                        .gte('rating', 4);
-                        
-                    // Fetch watchlist
+                        .from("ratings")
+                        .select("item_id")
+                        .eq("user_id", session.user.id)
+                        .gte("rating", 4);
+
                     const { data: watchlistData } = await supabase
-                        .from('watchlist')
-                        .select('item_id')
-                        .eq('user_id', session.user.id);
-                        
+                        .from("watchlist")
+                        .select("item_id")
+                        .eq("user_id", session.user.id);
+
                     if (ratingsData) {
                         liked_titles = ratingsData
-                            .map(r => allItems.find(i => i.id === r.item_id)?.title)
+                            .map((r) => allItems.find((i) => i.id === r.item_id)?.title)
                             .filter(Boolean);
                     }
                     if (watchlistData) {
                         watchlist_titles = watchlistData
-                            .map(w => allItems.find(i => i.id === w.item_id)?.title)
+                            .map((w) => allItems.find((i) => i.id === w.item_id)?.title)
                             .filter(Boolean);
                     }
                 }
 
-                // 2. Fetch recommendations (POST if we have data, GET otherwise)
                 if (liked_titles.length > 0 || watchlist_titles.length > 0) {
                     const res = await API.post(`/recommend?lang=${language}`, {
                         liked_titles,
-                        watchlist_titles
+                        watchlist_titles,
                     });
                     if (isMounted) setItems(res.data);
                 } else {
@@ -93,7 +92,9 @@ const Recommendations = () => {
 
         fetchSmartRecommendations();
         return () => { isMounted = false; };
-    }, [language]);
+    }, [language, catalogLoading, allItems]);
+
+    const isPageLoading = catalogLoading || loading;
 
     return (
         <PageTransition>
@@ -106,7 +107,7 @@ const Recommendations = () => {
                     {t('rec_title')}
                 </h1>
                 <p>{t('rec_subtitle')}</p>
-                {loading && (
+                {isPageLoading && (
                     <div style={{ marginTop: '20px', display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 16px', background: 'rgba(96, 165, 250, 0.1)', borderRadius: '20px', color: '#60a5fa', fontSize: '0.9rem', fontWeight: '500' }}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation: 'spin 1s linear infinite' }}>
                             <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
@@ -116,7 +117,7 @@ const Recommendations = () => {
                 )}
             </div>
 
-            {loading ? (
+            {isPageLoading ? (
                 <Carousel>
                     {[...Array(6)].map((_, i) => <SkeletonCard key={i} />)}
                 </Carousel>

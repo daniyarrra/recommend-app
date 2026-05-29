@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../services/supabase";
-import API from "../../services/api";
 import { useLanguage } from "../../context/LanguageContext";
+import { useCatalog } from "../../hooks/useCatalog";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 const COLORS = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899'];
@@ -13,7 +13,8 @@ const StarIcon = ({ size = 14 }) => (
 );
 
 const AdminDashboard = () => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
+    const { data: allItems = [], isLoading: catalogLoading } = useCatalog(language);
     const [stats, setStats] = useState({ users: 0, items: 0, reviews: 0, avgRating: 0 });
     const [topRated, setTopRated] = useState([]);
     const [topWatchlisted, setTopWatchlisted] = useState([]);
@@ -22,24 +23,18 @@ const AdminDashboard = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        if (catalogLoading) {
+            return;
+        }
+
         const fetchStats = async () => {
             try {
-                // Users count
                 const { count: usersCount } = await supabase
                     .from("profiles").select("*", { count: "exact", head: true });
 
-                // Reviews
                 const { data: allRatings, count: reviewsCount } = await supabase
                     .from("ratings").select("rating, item_id", { count: "exact" });
 
-                // Items from backend
-                let allItems = [];
-                try {
-                    const res = await API.get("/items");
-                    allItems = res.data;
-                } catch(e) { console.error(e); }
-
-                // Avg rating
                 let avg = 0;
                 if (allRatings && allRatings.length > 0) {
                     avg = allRatings.reduce((s, r) => s + r.rating, 0) / allRatings.length;
@@ -111,9 +106,9 @@ const AdminDashboard = () => {
             setLoading(false);
         };
         fetchStats();
-    }, []);
+    }, [allItems, catalogLoading]);
 
-    if (loading) {
+    if (loading || catalogLoading) {
         return <div className="admin-loading"><div className="loading-spinner"></div><span>{t('loading')}</span></div>;
     }
 

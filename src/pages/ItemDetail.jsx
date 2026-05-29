@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import API from "../services/api";
 import { supabase } from "../services/supabase";
 import Rating from "../components/Rating";
 import AudioPlayer from "../components/AudioPlayer";
 import LikeButton from "../components/LikeButton";
 import { useLanguage } from "../context/LanguageContext";
+import { useCatalogItem } from "../hooks/useCatalog";
 import "../styles/detail.css";
 
 /* ── SVG Icons ── */
@@ -58,9 +58,7 @@ const ItemDetail = () => {
     const { t, language, translateCategory } = useLanguage();
     const { id } = useParams();
     const navigate = useNavigate();
-    const [item, setItem] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const { data: item, isLoading: loading, isError } = useCatalogItem(id, language);
     const [viewers, setViewers] = useState(1);
     
     // Состояния для Watchlist
@@ -73,17 +71,6 @@ const ItemDetail = () => {
     const [reviewsLoading, setReviewsLoading] = useState(true);
 
     useEffect(() => {
-        setLoading(true);
-        API.get(`/items/${id}?lang=${language}`).then(res => {
-            setItem(res.data);
-            setLoading(false);
-        }).catch(err => {
-            console.error(err);
-            setError(t('load_error'));
-            setLoading(false);
-        });
-
-        // Проверяем авторизацию и наличие в Watchlist
         const checkWatchlist = async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (session?.user) {
@@ -98,6 +85,9 @@ const ItemDetail = () => {
                 if (data && data.length > 0) {
                     setInWatchlist(true);
                     setItemFolder(data[0].folder || null);
+                } else {
+                    setInWatchlist(false);
+                    setItemFolder(null);
                 }
             }
         };
@@ -106,6 +96,8 @@ const ItemDetail = () => {
         fetchReviews();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id, language]);
+
+    const error = isError ? t('load_error') : null;
 
     const fetchReviews = async () => {
         try {

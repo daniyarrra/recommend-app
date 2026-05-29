@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../services/supabase";
-import API from "../../services/api";
 import { useLanguage } from "../../context/LanguageContext";
+import { useCatalog } from "../../hooks/useCatalog";
 
 const StarIcon = ({ filled, size = 14 }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? "#fbbf24" : "none"} stroke={filled ? "#fbbf24" : "var(--text-secondary)"} strokeWidth="1.5">
@@ -22,19 +22,18 @@ const isSuspicious = (text) => {
 };
 
 const AdminReviews = () => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
+    const { data: items = [], isLoading: catalogLoading } = useCatalog(language);
     const [reviews, setReviews] = useState([]);
     const [search, setSearch] = useState("");
     const [filterRating, setFilterRating] = useState(0); // 0 = all
     const [filterSuspicious, setFilterSuspicious] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [items, setItems] = useState([]);
     const [confirmDelete, setConfirmDelete] = useState(null);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Fetch all reviews with user profile
                 const { data: ratingsData } = await supabase
                     .from("ratings")
                     .select(`
@@ -44,12 +43,6 @@ const AdminReviews = () => {
                     .order("created_at", { ascending: false });
 
                 setReviews(ratingsData || []);
-
-                // Fetch items for titles
-                try {
-                    const res = await API.get("/items");
-                    setItems(res.data);
-                } catch(e) { console.error(e); }
             } catch (err) {
                 console.error("Error fetching reviews:", err);
             }
@@ -95,7 +88,7 @@ const AdminReviews = () => {
         return matchSearch && matchRating && matchSuspicious;
     });
 
-    if (loading) {
+    if (loading || catalogLoading) {
         return <div className="admin-loading"><div className="loading-spinner"></div><span>{t('loading')}</span></div>;
     }
 

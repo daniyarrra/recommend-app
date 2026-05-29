@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "../services/supabase";
-import API from "../services/api";
 import ItemCard from "../components/ItemCard";
 import ActivityFeed from "../components/ActivityFeed";
 import { useLanguage } from "../context/LanguageContext";
+import { useCatalog } from "../hooks/useCatalog";
 import "../styles/profile.css";
 import "../styles/main.css";
 
@@ -52,6 +52,7 @@ const Profile = () => {
     const [nickname, setNickname] = useState("");
     const navigate = useNavigate();
     const { t, language, setLanguage } = useLanguage();
+    const { data: catalog = [], isLoading: catalogLoading } = useCatalog(language);
 
     const [topGenres, setTopGenres] = useState([]);
     const [categoryCounts, setCategoryCounts] = useState({});
@@ -60,6 +61,10 @@ const Profile = () => {
     const [showModal, setShowModal] = useState(null);
 
     useEffect(() => {
+        if (catalogLoading) {
+            return;
+        }
+
         const fetchUserData = async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) { navigate("/login"); return; }
@@ -119,8 +124,8 @@ const Profile = () => {
                 let allItems = [];
                 const idsArray = Array.from(itemIds);
                 if (idsArray.length > 0) {
-                    const res = await API.get(`/items?ids=${idsArray.join(',')}`);
-                    allItems = res.data;
+                    const idSet = new Set(idsArray);
+                    allItems = catalog.filter((item) => idSet.has(item.id));
                 }
 
                 allWatchlistItems = idsArray.map(itemId => {
@@ -185,7 +190,7 @@ const Profile = () => {
             setLoading(false);
         };
         fetchUserData();
-    }, [navigate]);
+    }, [navigate, catalog, catalogLoading]);
 
     const calculateAnalytics = (items) => {
         const uniqueItems = items;

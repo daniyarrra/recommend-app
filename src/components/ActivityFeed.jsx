@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "../services/supabase";
-import API from "../services/api";
 import { useLanguage } from "../context/LanguageContext";
+import { useCatalog } from "../hooks/useCatalog";
 import LikeButton from "./LikeButton";
 
 const StarIcon = ({ filled, size = 16 }) => (
@@ -13,14 +13,18 @@ const StarIcon = ({ filled, size = 16 }) => (
 
 const ActivityFeed = ({ currentUser }) => {
     const { language } = useLanguage();
+    const { data: catalog = [], isLoading: catalogLoading } = useCatalog(language);
     const [feed, setFeed] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
+        if (catalogLoading) {
+            return;
+        }
+
         const fetchFeed = async () => {
             try {
-                // 1. Fetch users the current user follows
                 const { data: followsData, error: followsError } = await supabase
                     .from("follows")
                     .select("following_id")
@@ -40,7 +44,6 @@ const ActivityFeed = ({ currentUser }) => {
                     return;
                 }
 
-                // 2. Fetch recent ratings from these users
                 const { data: ratingsData, error: ratingsError } = await supabase
                     .from("ratings")
                     .select(`
@@ -62,13 +65,9 @@ const ActivityFeed = ({ currentUser }) => {
 
                 if (ratingsError) throw ratingsError;
 
-                // 3. Fetch item details to show titles
-                const res = await API.get(`/items?lang=${language}`);
-                const items = res.data;
-
                 const enrichedFeed = (ratingsData || []).map(r => ({
                     ...r,
-                    item: items.find(i => i.id === r.item_id)
+                    item: catalog.find(i => i.id === r.item_id)
                 })).filter(r => r.item);
 
                 setFeed(enrichedFeed);
@@ -82,9 +81,9 @@ const ActivityFeed = ({ currentUser }) => {
         };
 
         fetchFeed();
-    }, [currentUser, language]);
+    }, [currentUser, language, catalog, catalogLoading]);
 
-    if (loading) return <div className="loading-spinner" style={{ margin: "40px auto" }}></div>;
+    if (loading || catalogLoading) return <div className="loading-spinner" style={{ margin: "40px auto" }}></div>;
     
     if (error) {
         if (error.includes("JWT expired")) {

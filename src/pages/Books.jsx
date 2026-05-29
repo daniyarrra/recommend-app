@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
-import API from "../services/api";
+import { useState } from "react";
 import ItemCard from "../components/ItemCard";
 import SkeletonCard from "../components/SkeletonCard";
 import Carousel from "../components/Carousel";
 import PageTransition from "../components/PageTransition";
 import { useLanguage } from "../context/LanguageContext";
+import { useCatalog } from "../hooks/useCatalog";
+import { filterBySearch, getUniqueGenres, matchesGenreFilter } from "../utils/filterCatalog";
 import "../styles/main.css";
 
 /* ── SVG Icons ── */
@@ -40,24 +41,15 @@ const EmptyIcon = () => (
 
 const Books = () => {
     const { t, language, translateCategory } = useLanguage();
-    const [items, setItems] = useState([]);
+    const { data: catalog = [], isLoading: loading } = useCatalog(language);
     const [searchQuery, setSearchQuery] = useState("");
-    const [loading, setLoading] = useState(true);
+    const [activeGenre, setActiveGenre] = useState("all");
 
-    useEffect(() => {
-        setLoading(true);
-        API.get(`/items?lang=${language}`).then(res => {
-            const books = res.data.filter(item => translateCategory(item.category) === t('cat_books'));
-            setItems(books);
-            setLoading(false);
-        }).catch(err => {
-            console.error(err);
-            setLoading(false);
-        });
-    }, [language, t, translateCategory]);
-
-    const filteredItems = items.filter(item => 
-        item.title.toLowerCase().includes(searchQuery.toLowerCase())
+    const items = catalog.filter(item => translateCategory(item.category) === t('cat_books'));
+    const availableGenres = [t('all_genres'), ...getUniqueGenres(items)];
+    const searchedItems = filterBySearch(items, searchQuery, translateCategory);
+    const filteredItems = searchedItems.filter(item =>
+        matchesGenreFilter(item, activeGenre, t('all_genres'))
     );
 
     return (
@@ -82,6 +74,21 @@ const Books = () => {
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
+
+                {availableGenres.length > 1 && (
+                    <div className="genre-tags">
+                        {availableGenres.map(genre => (
+                            <button
+                                key={genre}
+                                type="button"
+                                className={`genre-tag ${(activeGenre === genre || (activeGenre === "all" && genre === t('all_genres'))) ? "active" : ""}`}
+                                onClick={() => setActiveGenre(genre === t('all_genres') ? "all" : genre)}
+                            >
+                                {genre}
+                            </button>
+                        ))}
+                    </div>
+                )}
             </div>
 
             {loading ? (

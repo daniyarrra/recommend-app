@@ -1,17 +1,16 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "../services/supabase";
-import API from "../services/api";
 import ItemCard from "../components/ItemCard";
 import "../styles/profile.css";
 import "../styles/main.css";
-// import custom translation if needed, but for simplicity I will use hardcoded strings for now or default to basic translations
-// It's better to use LanguageContext
 import { useLanguage } from "../context/LanguageContext";
+import { useCatalog } from "../hooks/useCatalog";
 
 const PublicProfile = () => {
     const { id } = useParams();
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
+    const { data: allItems = [], isLoading: catalogLoading } = useCatalog(language);
     
     const [profile, setProfile] = useState(null);
     const [savedItems, setSavedItems] = useState([]);
@@ -30,6 +29,10 @@ const PublicProfile = () => {
     const [followersCount, setFollowersCount] = useState(0);
 
     useEffect(() => {
+        if (catalogLoading) {
+            return;
+        }
+
         const fetchPublicData = async () => {
             try {
                 // 1. Fetch profile
@@ -72,10 +75,6 @@ const PublicProfile = () => {
                     setFollowersCount(count || 0);
                 } catch(e) {}
 
-                // 2. Load catalog
-                const res = await API.get("/items");
-                const allItems = res.data;
-
                 // 3. Load Watchlist
                 const { data: watchlistData } = await supabase
                     .from("watchlist")
@@ -115,7 +114,7 @@ const PublicProfile = () => {
             setLoading(false);
         };
         fetchPublicData();
-    }, [id]);
+    }, [id, allItems, catalogLoading]);
 
     const calculateAnalytics = (saved, rated) => {
         const uniqueItems = Array.from(new Set([...saved, ...rated]));

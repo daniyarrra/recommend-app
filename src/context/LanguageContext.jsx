@@ -48,18 +48,18 @@ export const translations = {
     cat_books: "Книги",
     cat_music: "Музыка",
     // Home
-    search_catalog: "Поиск по каталогу...",
+    search_catalog: "Поиск по названию, жанру, описанию...",
     nothing_found: "Увы, ничего не найдено",
     all_genres: "Все",
     // Books page
     books_title: "Библиотека",
     books_subtitle: "Погрузитесь в захватывающие миры. Лучшие книги всех времен.",
-    search_books: "Поиск книг...",
+    search_books: "Поиск по названию, жанру, описанию...",
     no_books_found: "Увы, книг не найдено",
     // Music page
     music_title: "Плейлист",
     music_subtitle: "Твои любимые треки и легендарные альбомы в одном месте.",
-    search_music: "Поиск музыки...",
+    search_music: "Поиск по названию, жанру, исполнителю...",
     no_music_found: "Увы, треков не найдено",
     // Recommendations page
     rec_title: "Рекомендации",
@@ -233,18 +233,18 @@ export const translations = {
     cat_books: "Books",
     cat_music: "Music",
     // Home
-    search_catalog: "Search catalog...",
+    search_catalog: "Search by title, genre, description...",
     nothing_found: "Sorry, nothing found",
     all_genres: "All",
     // Books page
     books_title: "Library",
     books_subtitle: "Dive into captivating worlds. The best books of all time.",
-    search_books: "Search books...",
+    search_books: "Search by title, genre, description...",
     no_books_found: "Sorry, no books found",
     // Music page
     music_title: "Playlist",
     music_subtitle: "Your favorite tracks and legendary albums in one place.",
-    search_music: "Search music...",
+    search_music: "Search by title, genre, artist...",
     no_music_found: "Sorry, no tracks found",
     // Recommendations page
     rec_title: "Recommendations",
@@ -418,18 +418,18 @@ export const translations = {
     cat_books: "Кітаптар",
     cat_music: "Музыка",
     // Home
-    search_catalog: "Каталогтан іздеу...",
+    search_catalog: "Атау, жанр, сипаттама бойынша іздеу...",
     nothing_found: "Кешіріңіз, ештеңе табылмады",
     all_genres: "Барлығы",
     // Books page
     books_title: "Кітапхана",
     books_subtitle: "Тартымды әлемдерге еніңіз. Барлық уақыттағы ең жақсы кітаптар.",
-    search_books: "Кітаптарды іздеу...",
+    search_books: "Атау, жанр, сипаттама бойынша іздеу...",
     no_books_found: "Кешіріңіз, кітаптар табылмады",
     // Music page
     music_title: "Плейлист",
     music_subtitle: "Сүйікті тректеріңіз бен аңыз альбомдар бір жерде.",
-    search_music: "Музыка іздеу...",
+    search_music: "Атау, жанр, орындаушы бойынша іздеу...",
     no_music_found: "Кешіріңіз, тректер табылмады",
     // Recommendations page
     rec_title: "Ұсыныстар",

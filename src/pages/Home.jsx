@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
-import API from "../services/api";
+import { useState } from "react";
 import ItemCard from "../components/ItemCard";
 import SkeletonCard from "../components/SkeletonCard";
 import Carousel from "../components/Carousel";
 import HeroSlider from "../components/HeroSlider";
 import PageTransition from "../components/PageTransition";
 import { useLanguage } from "../context/LanguageContext";
+import { useCatalog } from "../hooks/useCatalog";
+import { filterBySearch, getUniqueGenres, matchesGenreFilter } from "../utils/filterCatalog";
 import "../styles/main.css";
 
 /* ── SVG Icons ── */
@@ -27,51 +28,29 @@ const EmptyIcon = () => (
 
 const Home = () => {
     const { t, language, translateCategory } = useLanguage();
-    const [items, setItems] = useState([]);
+    const { data: items = [], isLoading: loading } = useCatalog(language);
     const [searchQuery, setSearchQuery] = useState("");
     const [activeGenre, setActiveGenre] = useState("all");
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        setLoading(true);
-        API.get(`/items?lang=${language}`).then(res => {
-            if (Array.isArray(res.data)) {
-                setItems(res.data);
-            } else {
-                console.error("API did not return an array:", res.data);
-                setItems([]);
-            }
-            setLoading(false);
-        }).catch(err => {
-            console.error(err);
-            setLoading(false);
-        });
-    }, [language]);
-
-    const availableGenres = [t('all_genres'), ...new Set(items.filter(item => {
-        const cat = translateCategory(item.category);
-        return cat === t('cat_movies') || cat === t('cat_tv');
-    }).map(item => item.genre))].filter(Boolean);
-
-    const movies = items.filter(item => translateCategory(item.category) === t('cat_movies'));
-    const series = items.filter(item => translateCategory(item.category) === t('cat_tv'));
-
-    const filteredMovies = movies.filter(item => {
-        const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesGenre = activeGenre === "all" || activeGenre === t('all_genres') || item.genre === activeGenre;
-        return matchesSearch && matchesGenre;
-    });
-
-    const filteredSeries = series.filter(item => {
-        const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesGenre = activeGenre === "all" || activeGenre === t('all_genres') || item.genre === activeGenre;
-        return matchesSearch && matchesGenre;
-    });
 
     const moviesAndTvItems = items.filter(item => {
         const cat = translateCategory(item.category);
         return cat === t('cat_movies') || cat === t('cat_tv');
     });
+
+    const availableGenres = [t('all_genres'), ...getUniqueGenres(moviesAndTvItems)];
+
+    const searchedItems = filterBySearch(moviesAndTvItems, searchQuery, translateCategory);
+
+    const filteredMovies = searchedItems.filter(item =>
+        translateCategory(item.category) === t('cat_movies') &&
+        matchesGenreFilter(item, activeGenre, t('all_genres'))
+    );
+
+    const filteredSeries = searchedItems.filter(item =>
+        translateCategory(item.category) === t('cat_tv') &&
+        matchesGenreFilter(item, activeGenre, t('all_genres'))
+    );
+
     const featuredItems = moviesAndTvItems.filter(item => item.is_featured);
     
     // Всегда показываем 5 фильмов/сериалов в верхнем слайдере
