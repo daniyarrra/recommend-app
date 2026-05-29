@@ -63,12 +63,12 @@ const Recommendations = () => {
 
                     if (ratingsData) {
                         liked_titles = ratingsData
-                            .map((r) => allItems.find((i) => i.id === r.item_id)?.title)
+                            .map((r) => allItems.find((i) => String(i.id) === String(r.item_id))?.title)
                             .filter(Boolean);
                     }
                     if (watchlistData) {
                         watchlist_titles = watchlistData
-                            .map((w) => allItems.find((i) => i.id === w.item_id)?.title)
+                            .map((w) => allItems.find((i) => String(i.id) === String(w.item_id))?.title)
                             .filter(Boolean);
                     }
                 }
@@ -95,6 +95,7 @@ const Recommendations = () => {
     }, [language, catalogLoading, allItems]);
 
     const isPageLoading = catalogLoading || loading;
+    const hasAiReasons = items.some((item) => item.ai_reason);
 
     return (
         <PageTransition>
@@ -112,8 +113,13 @@ const Recommendations = () => {
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation: 'spin 1s linear infinite' }}>
                             <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
                         </svg>
-                        AI is analyzing your taste...
+                        {t('rec_ai_analyzing')}
                     </div>
+                )}
+                {!isPageLoading && items.length > 0 && !hasAiReasons && (
+                    <p style={{ marginTop: '16px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                        {t('rec_ai_fallback')}
+                    </p>
                 )}
             </div>
 

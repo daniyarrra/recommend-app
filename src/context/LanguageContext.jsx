@@ -65,6 +65,8 @@ export const translations = {
     rec_title: "Рекомендации",
     rec_subtitle: "Персональные предложения на основе ваших вкусов.",
     no_recs: "Пока нет рекомендаций. Оценивайте контент, чтобы получить предложения!",
+    rec_ai_analyzing: "ИИ анализирует ваши предпочтения...",
+    rec_ai_fallback: "ИИ временно недоступен — показаны рекомендации по вашим жанрам.",
     // ItemDetail page
     back_to_list: "Назад к списку",
     no_description: "Описание пока отсутствует. Мы добавим его немного позже!",
@@ -250,6 +252,8 @@ export const translations = {
     rec_title: "Recommendations",
     rec_subtitle: "Personal suggestions based on your taste.",
     no_recs: "No recommendations yet. Rate content to get suggestions!",
+    rec_ai_analyzing: "AI is analyzing your taste...",
+    rec_ai_fallback: "AI is temporarily unavailable — showing genre-based picks.",
     // ItemDetail page
     back_to_list: "Back to list",
     no_description: "No description available yet. We'll add it soon!",
@@ -435,6 +439,8 @@ export const translations = {
     rec_title: "Ұсыныстар",
     rec_subtitle: "Сіздің талғамыңызға негізделген жеке ұсыныстар.",
     no_recs: "Әзірге ұсыныстар жоқ. Ұсыныстар алу үшін мазмұнды бағалаңыз!",
+    rec_ai_analyzing: "AI сіздің талғамыңызды талдауда...",
+    rec_ai_fallback: "AI уақытша қолжетімсіз — жанр бойынша ұсыныстар көрсетілді.",
     // ItemDetail page
     back_to_list: "Тізімге оралу",
     no_description: "Сипаттама әзірге жоқ. Біз оны жақында қосамыз!",
