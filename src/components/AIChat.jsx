@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import API from "../services/api";
 import { useLanguage } from "../context/LanguageContext";
 import "../styles/chat.css";
 
