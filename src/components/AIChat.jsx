@@ -52,14 +52,18 @@ const AIChat = () => {
         setIsLoading(true);
 
         try {
-            const response = await API.post(`/api/chat?lang=${language}`, { 
-                message: userMsg,
-                history: history 
+            const response = await fetch(`/api/chat?lang=${language}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: userMsg, history: history })
             });
+            
+            const data = await response.json();
+            
             setMessages(prev => [...prev, { 
                 role: "ai", 
-                text: response.data.reply, 
-                items: response.data.items || []
+                text: data.reply, 
+                items: data.items || []
             }]);
         } catch (error) {
             console.error("Chat API failed:", error);
