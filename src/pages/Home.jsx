@@ -35,7 +35,12 @@ const Home = () => {
     useEffect(() => {
         setLoading(true);
         API.get(`/items?lang=${language}`).then(res => {
-            setItems(res.data);
+            if (Array.isArray(res.data)) {
+                setItems(res.data);
+            } else {
+                console.error("API did not return an array:", res.data);
+                setItems([]);
+            }
             setLoading(false);
         }).catch(err => {
             console.error(err);
