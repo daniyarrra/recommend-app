@@ -65,7 +65,7 @@ const AIChat = () => {
             console.error("Chat API failed:", error);
             setMessages(prev => [...prev, { 
                 role: "ai", 
-                text: "Упс! Произошла ошибка. Пожалуйста, попробуйте еще раз." 
+                text: `Упс! Произошла ошибка: ${error.message}` 
             }]);
         } finally {
             setIsLoading(false);
