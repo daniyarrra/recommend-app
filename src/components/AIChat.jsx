@@ -48,10 +48,13 @@ const AIChat = () => {
         const history = messages.map(m => ({ role: m.role, text: m.text }));
 
         setMessages(prev => [...prev, { role: "user", text: userMsg }]);
-        setIsLoading(true);
-
         try {
-            const response = await fetch(`/api/chat?lang=${language}`, {
+            // В режиме локальной разработки (npm start) идем на бэкенд, в продакшене (Vercel) - на Serverless функцию
+            const isLocal = process.env.NODE_ENV === 'development';
+            const baseUrl = isLocal ? (process.env.REACT_APP_API_URL || "http://localhost:5000") : "";
+            const chatUrl = `${baseUrl}/api/chat?lang=${language}`;
+
+            const response = await fetch(chatUrl, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ message: userMsg, history: history })
