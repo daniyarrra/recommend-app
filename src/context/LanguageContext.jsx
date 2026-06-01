@@ -48,13 +48,13 @@ export const translations = {
     cat_books: "Книги",
     cat_music: "Музыка",
     // Home
-    search_catalog: "Поиск по названию, жанру, описанию...",
+    search_catalog: "Поиск по названию, жанру...",
     nothing_found: "Увы, ничего не найдено",
     all_genres: "Все",
     // Books page
     books_title: "Библиотека",
     books_subtitle: "Погрузитесь в захватывающие миры. Лучшие книги всех времен.",
-    search_books: "Поиск по названию, жанру, описанию...",
+    search_books: "Поиск по названию, жанру...",
     no_books_found: "Увы, книг не найдено",
     // Music page
     music_title: "Плейлист",
@@ -186,7 +186,44 @@ export const translations = {
     admin_no_reviews: "Отзывы не найдены",
     viewing_now: "смотрят сейчас",
     director: "Режиссер",
-    cast: "В ролях"
+    cast: "В ролях",
+    // Filter & Profile extras
+    filter_btn: "Фильтр",
+    tab_feed: "Лента активности",
+    tab_my_ratings: "Мои оценки",
+    folder_all: "Все",
+    folder_unsorted: "Без папки",
+    folder_planned: "В планах",
+    folder_watching: "Смотрю",
+    folder_watched: "Просмотрено",
+    folder_dropped: "Брошено",
+    folder_assign: "В папку...",
+    remove_folder: "Убрать из папки",
+    about_me: "О себе",
+    about_me_desc: "Расскажите немного о себе, своих интересах и любимых жанрах",
+    about_me_placeholder: "Всем привет! Люблю научную фантастику и инди-музыку...",
+    nickname_label: "Никнейм",
+    nickname_desc: "Ваше отображаемое имя на платформе",
+    nickname_ph: "Ваш никнейм",
+    saves_auto: "Сохраняется автоматически",
+    avatar_style: "Стиль Аватарки (DiceBear)",
+    share_profile: "Поделиться профилем",
+    copy_link: "Скопировать ссылку на мою страницу",
+    link_copied: "Ссылка скопирована!",
+    copy_manual: "Скопируйте ссылку вручную: ",
+    followers_label: "подписчиков",
+    following_label: "подписок",
+    followers_title: "Подписчики",
+    following_title: "Подписки",
+    empty_list: "Список пуст",
+    profile_hidden: "Профиль скрыт",
+    confirm_delete_account: "Вы уверены, что хотите НАВСЕГДА удалить свой аккаунт? Это действие нельзя отменить.",
+    folder_empty: "В папке пока пусто.",
+    error_save_settings: "Ошибка при сохранении настроек.",
+    avatar_updated: "Аватарка успешно обновлена!",
+    avatar_upload_error: "Ошибка загрузки. Убедитесь, что вы создали публичный бакет 'avatars' в Supabase Storage.",
+    avatar_style_error: "Ошибка при выборе стиля.",
+    error_delete_account: "Ошибка: "
   },
   en: {
     // AI
@@ -235,13 +272,13 @@ export const translations = {
     cat_books: "Books",
     cat_music: "Music",
     // Home
-    search_catalog: "Search by title, genre, description...",
+    search_catalog: "Search by title, genre...",
     nothing_found: "Sorry, nothing found",
     all_genres: "All",
     // Books page
     books_title: "Library",
     books_subtitle: "Dive into captivating worlds. The best books of all time.",
-    search_books: "Search by title, genre, description...",
+    search_books: "Search by title, genre...",
     no_books_found: "Sorry, no books found",
     // Music page
     music_title: "Playlist",
@@ -373,7 +410,44 @@ export const translations = {
     admin_no_reviews: "No reviews found",
     viewing_now: "viewing now",
     director: "Director",
-    cast: "Cast"
+    cast: "Cast",
+    // Filter & Profile extras
+    filter_btn: "Filter",
+    tab_feed: "Activity Feed",
+    tab_my_ratings: "My Ratings",
+    folder_all: "All",
+    folder_unsorted: "Unsorted",
+    folder_planned: "Planned",
+    folder_watching: "Watching",
+    folder_watched: "Watched",
+    folder_dropped: "Dropped",
+    folder_assign: "To folder...",
+    remove_folder: "Remove from folder",
+    about_me: "About Me",
+    about_me_desc: "Tell us about yourself, your interests and favorite genres",
+    about_me_placeholder: "Hi everyone! I love sci-fi and indie music...",
+    nickname_label: "Nickname",
+    nickname_desc: "Your display name on the platform",
+    nickname_ph: "Your nickname",
+    saves_auto: "Saved automatically",
+    avatar_style: "Avatar Style (DiceBear)",
+    share_profile: "Share Profile",
+    copy_link: "Copy link to my page",
+    link_copied: "Link copied!",
+    copy_manual: "Copy link manually: ",
+    followers_label: "followers",
+    following_label: "following",
+    followers_title: "Followers",
+    following_title: "Following",
+    empty_list: "The list is empty",
+    profile_hidden: "Profile hidden",
+    confirm_delete_account: "Are you sure you want to PERMANENTLY delete your account? This action cannot be undone.",
+    folder_empty: "This folder is empty.",
+    error_save_settings: "Error saving settings.",
+    avatar_updated: "Avatar updated successfully!",
+    avatar_upload_error: "Upload error. Make sure you've created a public 'avatars' bucket in Supabase Storage.",
+    avatar_style_error: "Error selecting style.",
+    error_delete_account: "Error: "
   },
   kz: {
     // AI
@@ -422,13 +496,13 @@ export const translations = {
     cat_books: "Кітаптар",
     cat_music: "Музыка",
     // Home
-    search_catalog: "Атау, жанр, сипаттама бойынша іздеу...",
+    search_catalog: "Атау, жанр бойынша іздеу...",
     nothing_found: "Кешіріңіз, ештеңе табылмады",
     all_genres: "Барлығы",
     // Books page
     books_title: "Кітапхана",
     books_subtitle: "Тартымды әлемдерге еніңіз. Барлық уақыттағы ең жақсы кітаптар.",
-    search_books: "Атау, жанр, сипаттама бойынша іздеу...",
+    search_books: "Атау, жанр бойынша іздеу...",
     no_books_found: "Кешіріңіз, кітаптар табылмады",
     // Music page
     music_title: "Плейлист",
@@ -560,7 +634,44 @@ export const translations = {
     admin_no_reviews: "Пікірлер табылмады",
     viewing_now: "қазір қарауда",
     director: "Режиссер",
-    cast: "Рөлдерде"
+    cast: "Рөлдерде",
+    // Filter & Profile extras
+    filter_btn: "Сүзгі",
+    tab_feed: "Белсенділік лентасы",
+    tab_my_ratings: "Менің бағаларым",
+    folder_all: "Барлығы",
+    folder_unsorted: "Қалтасыз",
+    folder_planned: "Жоспарда",
+    folder_watching: "Қарауда",
+    folder_watched: "Қаралды",
+    folder_dropped: "Тасталды",
+    folder_assign: "Қалтаға...",
+    remove_folder: "Қалтадан алып тастау",
+    about_me: "Өзім туралы",
+    about_me_desc: "Өзіңіз, қызығушылықтарыңыз және сүйікті жанрларыңыз туралы айтыңыз",
+    about_me_placeholder: "Бәріне сәлем! Ғылыми фантастика мен инди-музыканы жақсы көремін...",
+    nickname_label: "Лақап ат",
+    nickname_desc: "Платформадағы көрсетілетін атыңыз",
+    nickname_ph: "Сіздің лақап атыңыз",
+    saves_auto: "Автоматты түрде сақталады",
+    avatar_style: "Аватар стилі (DiceBear)",
+    share_profile: "Профильді бөлісу",
+    copy_link: "Менің бетіме сілтемені көшіру",
+    link_copied: "Сілтеме көшірілді!",
+    copy_manual: "Сілтемені қолмен көшіріңіз: ",
+    followers_label: "жазылушылар",
+    following_label: "жазылымдар",
+    followers_title: "Жазылушылар",
+    following_title: "Жазылымдар",
+    empty_list: "Тізім бос",
+    profile_hidden: "Профиль жасырын",
+    confirm_delete_account: "Аккаунтыңызды МӘҢГІЛІККЕ жойғыңыз келетініне сенімдісіз бе? Бұл әрекетті кері қайтару мүмкін емес.",
+    folder_empty: "Бұл қалта бос.",
+    error_save_settings: "Баптауларды сақтау қатесі.",
+    avatar_updated: "Аватар сәтті жаңартылды!",
+    avatar_upload_error: "Жүктеу қатесі. Supabase Storage-да 'avatars' бакетін жасағаныңызды тексеріңіз.",
+    avatar_style_error: "Стильді таңдау қатесі.",
+    error_delete_account: "Қате: "
   }
 };
 
@@ -588,8 +699,82 @@ export const LanguageProvider = ({ children }) => {
     return cat;
   };
 
+  const genreTranslations = {
+    'action': { ru: 'Боевик', en: 'Action', kz: 'Атыс-шабыс' },
+    'боевик': { ru: 'Боевик', en: 'Action', kz: 'Атыс-шабыс' },
+    'adventure': { ru: 'Приключения', en: 'Adventure', kz: 'Шытырман оқиғалы' },
+    'приключения': { ru: 'Приключения', en: 'Adventure', kz: 'Шытырман оқиғалы' },
+    'animation': { ru: 'Анимация', en: 'Animation', kz: 'Анимация' },
+    'анимация': { ru: 'Анимация', en: 'Animation', kz: 'Анимация' },
+    'biography': { ru: 'Биография', en: 'Biography', kz: 'Өмірбаян' },
+    'биография': { ru: 'Биография', en: 'Biography', kz: 'Өмірбаян' },
+    'character study': { ru: 'Исследование характера', en: 'Character Study', kz: 'Мінезді зерттеу' },
+    'исследование характера': { ru: 'Исследование характера', en: 'Character Study', kz: 'Мінезді зерттеу' },
+    'comedy': { ru: 'Комедия', en: 'Comedy', kz: 'Комедия' },
+    'комедия': { ru: 'Комедия', en: 'Comedy', kz: 'Комедия' },
+    'documentary': { ru: 'Документальный', en: 'Documentary', kz: 'Деректі' },
+    'документальный': { ru: 'Документальный', en: 'Documentary', kz: 'Деректі' },
+    'drama': { ru: 'Драма', en: 'Drama', kz: 'Драма' },
+    'драма': { ru: 'Драма', en: 'Drama', kz: 'Драма' },
+    'epic': { ru: 'Эпос', en: 'Epic', kz: 'Эпос' },
+    'эпический': { ru: 'Эпос', en: 'Epic', kz: 'Эпос' },
+    'family': { ru: 'Семейный', en: 'Family', kz: 'Отбасылық' },
+    'семейный': { ru: 'Семейный', en: 'Family', kz: 'Отбасылық' },
+    'fantasy': { ru: 'Фэнтези', en: 'Fantasy', kz: 'Фэнтези' },
+    'фэнтези': { ru: 'Фэнтези', en: 'Fantasy', kz: 'Фэнтези' },
+    'history': { ru: 'История', en: 'History', kz: 'Тарих' },
+    'история': { ru: 'История', en: 'History', kz: 'Тарих' },
+    'horror': { ru: 'Ужасы', en: 'Horror', kz: 'Қорқынышты' },
+    'ужасы': { ru: 'Ужасы', en: 'Horror', kz: 'Қорқынышты' },
+    'kids': { ru: 'Детский', en: 'Kids', kz: 'Балаларға арналған' },
+    'детский': { ru: 'Детский', en: 'Kids', kz: 'Балаларға арналған' },
+    'music documentaries': { ru: 'Музыкальные док.', en: 'Music Docs', kz: 'Музыкалық деректі' },
+    'музыкальные документальные': { ru: 'Музыкальные док.', en: 'Music Docs', kz: 'Музыкалық деректі' },
+    'nonfiction': { ru: 'Нон-фикшн', en: 'Nonfiction', kz: 'Нон-фикшн' },
+    'документальная литература/нон-фикшн': { ru: 'Нон-фикшн', en: 'Nonfiction', kz: 'Нон-фикшн' },
+    'reality': { ru: 'Реалити-шоу', en: 'Reality', kz: 'Реалити-шоу' },
+    'реалити': { ru: 'Реалити-шоу', en: 'Reality', kz: 'Реалити-шоу' },
+    'romance': { ru: 'Мелодрама', en: 'Romance', kz: 'Мелодрама' },
+    'романтика': { ru: 'Мелодрама', en: 'Romance', kz: 'Мелодрама' },
+    'sci-fi': { ru: 'Фантастика', en: 'Sci-Fi', kz: 'Фантастика' },
+    'научная фантастика': { ru: 'Фантастика', en: 'Sci-Fi', kz: 'Фантастика' },
+    'thriller': { ru: 'Триллер', en: 'Thriller', kz: 'Триллер' },
+    'триллер': { ru: 'Триллер', en: 'Thriller', kz: 'Триллер' },
+    'western': { ru: 'Вестерн', en: 'Western', kz: 'Вестерн' },
+    'вестерн': { ru: 'Вестерн', en: 'Western', kz: 'Вестерн' },
+    
+    // Music and Books
+    'alternative': { ru: 'Альтернатива', en: 'Alternative', kz: 'Альтернатива' },
+    'blues': { ru: 'Блюз', en: 'Blues', kz: 'Блюз' },
+    'christian': { ru: 'Христианская', en: 'Christian', kz: 'Христиан діни' },
+    'country': { ru: 'Кантри', en: 'Country', kz: 'Кантри' },
+    'dance': { ru: 'Танцевальная', en: 'Dance', kz: 'Би' },
+    'electronic': { ru: 'Электронная', en: 'Electronic', kz: 'Электронды' },
+    'folk': { ru: 'Фолк', en: 'Folk', kz: 'Фолк' },
+    'hard rock': { ru: 'Хард-рок', en: 'Hard Rock', kz: 'Хард-рок' },
+    'k-pop': { ru: 'K-Pop', en: 'K-Pop', kz: 'K-Pop' },
+    'metal': { ru: 'Метал', en: 'Metal', kz: 'Метал' },
+    'pop': { ru: 'Поп', en: 'Pop', kz: 'Поп' },
+    'r&b': { ru: 'R&B', en: 'R&B', kz: 'R&B' },
+    'rock': { ru: 'Рок', en: 'Rock', kz: 'Рок' },
+    'soul': { ru: 'Соул', en: 'Soul', kz: 'Соул' },
+    'science fiction': { ru: 'Научная фантастика', en: 'Science Fiction', kz: 'Ғылыми фантастика' },
+    'mystery': { ru: 'Детектив', en: 'Mystery', kz: 'Детектив' },
+    'novel': { ru: 'Роман', en: 'Novel', kz: 'Роман' },
+    'non-fiction': { ru: 'Нон-фикшн', en: 'Non-fiction', kz: 'Нон-фикшн' }
+  };
+
+  const translateGenre = (genre) => {
+    if (!genre) return genre;
+    const lowerGenre = genre.toLowerCase().trim();
+    if (genreTranslations[lowerGenre] && genreTranslations[lowerGenre][language]) {
+      return genreTranslations[lowerGenre][language];
+    }
+    return genre;
+  };
+
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t, translateCategory }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t, translateCategory, translateGenre }}>
       {children}
     </LanguageContext.Provider>
   );

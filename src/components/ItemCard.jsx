@@ -4,10 +4,11 @@ import "../styles/card.css";
 import Rating from "./Rating";
 import AudioPlayer from "./AudioPlayer";
 import { useLanguage } from "../context/LanguageContext";
+import { parseGenres } from "../utils/filterCatalog";
 
 const ItemCard = ({ item }) => {
     const navigate = useNavigate();
-    const { t } = useLanguage();
+    const { t, translateGenre } = useLanguage();
     const imageUrl = item.image || "https://via.placeholder.com/500x750?text=No+Image";
 
     return (
@@ -40,7 +41,7 @@ const ItemCard = ({ item }) => {
                 )}
             </div>
             <div className="card-content">
-                <div className="genre">{item.genre}</div>
+                <div className="genre">{parseGenres(item.genre).map(g => translateGenre(g)).join(", ")}</div>
                 <div className="title">{item.title}</div>
                 
                 {item.preview_url && (

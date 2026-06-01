@@ -40,16 +40,17 @@ const EmptyIcon = () => (
 );
 
 const Books = () => {
-    const { t, language, translateCategory } = useLanguage();
+    const { t, language, translateCategory, translateGenre } = useLanguage();
     const { data: catalog = [], isLoading: loading } = useCatalog(language);
     const [searchQuery, setSearchQuery] = useState("");
     const [activeGenre, setActiveGenre] = useState("all");
+    const [showFilters, setShowFilters] = useState(false);
 
     const items = catalog.filter(item => translateCategory(item.category) === t('cat_books'));
-    const availableGenres = [t('all_genres'), ...getUniqueGenres(items)];
-    const searchedItems = filterBySearch(items, searchQuery, translateCategory);
+    const availableGenres = [t('all_genres'), ...getUniqueGenres(items, translateGenre)];
+    const searchedItems = filterBySearch(items, searchQuery, translateCategory, translateGenre);
     const filteredItems = searchedItems.filter(item =>
-        matchesGenreFilter(item, activeGenre, t('all_genres'))
+        matchesGenreFilter(item, activeGenre, t('all_genres'), translateGenre)
     );
 
     return (
@@ -64,29 +65,44 @@ const Books = () => {
                 </h1>
                 <p>{t('books_subtitle')}</p>
                 
-                <div className="search-container" style={{ marginTop: '28px' }}>
-                    <SearchIcon />
-                    <input 
-                        type="text" 
-                        className="search-bar" 
-                        placeholder={t('search_books')} 
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
+                <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', maxWidth: '650px', margin: '28px auto' }}>
+                    <div className="search-container" style={{ margin: '0', flex: '1', maxWidth: '500px' }}>
+                        <SearchIcon />
+                        <input 
+                            type="text" 
+                            className="search-bar" 
+                            placeholder={t('search_books')} 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                    <button 
+                        className={`tab-btn ${showFilters ? 'active' : ''}`}
+                        onClick={() => setShowFilters(!showFilters)}
+                        style={{ height: '54px', display: 'flex', alignItems: 'center', gap: '8px', padding: '0 20px', borderRadius: '16px' }}
+                    >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                        <span>{t('filter_btn')}</span>
+                    </button>
                 </div>
 
-                {availableGenres.length > 1 && (
-                    <div className="genre-tags">
-                        {availableGenres.map(genre => (
-                            <button
-                                key={genre}
-                                type="button"
-                                className={`genre-tag ${(activeGenre === genre || (activeGenre === "all" && genre === t('all_genres'))) ? "active" : ""}`}
-                                onClick={() => setActiveGenre(genre === t('all_genres') ? "all" : genre)}
-                            >
-                                {genre}
-                            </button>
-                        ))}
+                {showFilters && availableGenres.length > 1 && (
+                    <div style={{ marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '20px', padding: '20px', background: 'var(--glass-bg)', borderRadius: '16px', border: '1px solid var(--glass-border)', maxWidth: '800px', margin: '0 auto 28px auto' }}>
+                        <div>
+                            <div style={{ textAlign: 'left', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '10px', fontWeight: 'bold' }}>Жанры:</div>
+                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                {availableGenres.map(genre => (
+                                    <button
+                                        key={genre}
+                                        type="button"
+                                        className={`genre-tag ${(activeGenre === genre || (activeGenre === "all" && genre === t('all_genres'))) ? "active" : ""}`}
+                                        onClick={() => setActiveGenre(genre === t('all_genres') ? "all" : genre)}
+                                    >
+                                        {genre}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>

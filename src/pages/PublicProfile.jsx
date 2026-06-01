@@ -289,7 +289,8 @@ const PublicProfile = () => {
                         ];
 
                         return categories.map(cat => {
-                            const itemsInCategory = displayItems.filter(item => item.category === cat.key);
+                            const translatedCat = t(cat.label);
+                            const itemsInCategory = displayItems.filter(item => item.category === cat.key || item.category === translatedCat);
                             if (itemsInCategory.length === 0) return null;
 
                             return (

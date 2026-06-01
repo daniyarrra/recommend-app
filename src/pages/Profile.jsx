@@ -223,7 +223,7 @@ const Profile = () => {
     };
 
     const handleDeleteAccount = async () => {
-        if (window.confirm("Вы уверены, что хотите НАВСЕГДА удалить свой аккаунт? Это действие нельзя отменить.")) {
+        if (window.confirm(t('confirm_delete_account'))) {
             try {
                 // Вызываем SQL-функцию delete_user
                 const { error } = await supabase.rpc('delete_user');
@@ -233,8 +233,8 @@ const Profile = () => {
                 await supabase.auth.signOut();
                 navigate("/");
             } catch (err) {
-                console.error("Ошибка при удалении аккаунта:", err);
-                alert("Ошибка: " + err.message + "\n\nВозможно, у вас остались лайки или подписки, которые мешают удалению. Пожалуйста, покажите это сообщение разработчику.");
+                console.error("Error deleting account:", err);
+                alert(t('error_delete_account') + err.message);
             }
         }
     };
@@ -263,7 +263,7 @@ const Profile = () => {
             setIsPublic(newVal);
         } catch (err) {
             console.error("Error updating privacy:", err);
-            alert("Ошибка при сохранении настроек.");
+            alert(t('error_save_settings'));
         } finally {
             setUpdatingPublic(false);
         }
@@ -298,10 +298,10 @@ const Profile = () => {
             if (updateError) throw updateError;
 
             setAvatarUrl(publicUrl);
-            alert("Аватарка успешно обновлена!");
+            alert(t('avatar_updated'));
         } catch (err) {
             console.error("Error uploading avatar:", err);
-            alert("Ошибка загрузки. Убедитесь, что вы создали публичный бакет 'avatars' в Supabase Storage.");
+            alert(t('avatar_upload_error'));
         } finally {
             setUploading(false);
         }
@@ -316,7 +316,7 @@ const Profile = () => {
             if (error) throw error;
             setAvatarUrl(newUrl);
         } catch (err) {
-            alert("Ошибка при выборе стиля.");
+            alert(t('avatar_style_error'));
         }
     };
 
@@ -335,7 +335,14 @@ const Profile = () => {
 
     const displayAvatar = avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${user.email}&backgroundColor=3b82f6`;
 
+    // Internal keys are Russian (stored in Supabase), display uses translations
     const FIXED_FOLDERS = ['В планах', 'Смотрю', 'Просмотрено', 'Брошено'];
+    const FOLDER_KEYS = {
+        'В планах': 'folder_planned',
+        'Смотрю': 'folder_watching',
+        'Просмотрено': 'folder_watched',
+        'Брошено': 'folder_dropped'
+    };
 
     // Фильтрация элементов
     const displayItems = 
@@ -390,10 +397,10 @@ const Profile = () => {
                     
                     <div style={{ marginTop: '16px', display: 'flex', gap: '20px', marginBottom: '20px' }}>
                         <div style={{ cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-secondary)', transition: 'color 0.2s' }} onClick={() => setShowModal('followers')} onMouseOver={e => e.currentTarget.style.color='var(--text-primary)'} onMouseOut={e => e.currentTarget.style.color='var(--text-secondary)'}>
-                            <strong style={{ color: 'var(--text-primary)' }}>{followers.length}</strong> подписчиков
+                            <strong style={{ color: 'var(--text-primary)' }}>{followers.length}</strong> {t('followers_label')}
                         </div>
                         <div style={{ cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-secondary)', transition: 'color 0.2s' }} onClick={() => setShowModal('following')} onMouseOver={e => e.currentTarget.style.color='var(--text-primary)'} onMouseOut={e => e.currentTarget.style.color='var(--text-secondary)'}>
-                            <strong style={{ color: 'var(--text-primary)' }}>{following.length}</strong> подписок
+                            <strong style={{ color: 'var(--text-primary)' }}>{following.length}</strong> {t('following_label')}
                         </div>
                     </div>
 
@@ -430,7 +437,7 @@ const Profile = () => {
                         onClick={() => setActiveTab('feed')}
                         style={{ whiteSpace: 'nowrap' }}
                     >
-                        Лента активности
+                        {t('tab_feed')}
                     </button>
                     <button 
                         className={`profile-tab ${activeTab === 'watchlist' ? 'active' : ''}`}
@@ -444,7 +451,7 @@ const Profile = () => {
                         onClick={() => setActiveTab('ratings')}
                         style={{ whiteSpace: 'nowrap' }}
                     >
-                        Мои оценки
+                        {t('tab_my_ratings')}
                     </button>
                     <button 
                         className={`profile-tab ${activeTab === 'settings' ? 'active' : ''}`}
@@ -465,7 +472,7 @@ const Profile = () => {
                                 borderColor: activeFolder === 'all' ? 'var(--accent-color)' : 'var(--glass-border)'
                             }}
                         >
-                            Все
+                            {t('folder_all')}
                         </button>
                         <button 
                             onClick={() => setActiveFolder('unsorted')}
@@ -476,7 +483,7 @@ const Profile = () => {
                                 borderColor: activeFolder === 'unsorted' ? 'var(--accent-color)' : 'var(--glass-border)'
                             }}
                         >
-                            Без папки
+                            {t('folder_unsorted')}
                         </button>
                         {FIXED_FOLDERS.map(folder => (
                             <button 
@@ -489,7 +496,7 @@ const Profile = () => {
                                     borderColor: activeFolder === folder ? 'var(--accent-color)' : 'var(--glass-border)'
                                 }}
                             >
-                                {folder}
+                                {t(FOLDER_KEYS[folder]) || folder}
                             </button>
                         ))}
                     </div>
@@ -506,32 +513,32 @@ const Profile = () => {
                             
                             <div className="settings-card" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
                                 <div style={{ marginBottom: '12px' }}>
-                                    <h4>О себе</h4>
-                                    <p>Расскажите немного о себе, своих интересах и любимых жанрах</p>
+                                    <h4>{t('about_me')}</h4>
+                                    <p>{t('about_me_desc')}</p>
                                 </div>
                                 <textarea 
                                     className="auth-input" 
                                     style={{ margin: 0, padding: '12px', minHeight: '80px', resize: 'vertical' }}
-                                    placeholder="Всем привет! Люблю научную фантастику и инди-музыку..."
+                                    placeholder={t('about_me_placeholder')}
                                     value={bio}
                                     onChange={(e) => setBio(e.target.value)}
                                     onBlur={async () => {
                                         await supabase.from('profiles').upsert({ id: user.id, bio, nickname, email: user.email, is_public: isPublic, avatar_url: avatarUrl });
                                     }}
                                 />
-                                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', alignSelf: 'flex-end', marginTop: '4px' }}>Сохраняется автоматически</span>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', alignSelf: 'flex-end', marginTop: '4px' }}>{t('saves_auto')}</span>
                             </div>
 
                             <div className="settings-card" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
                                 <div style={{ marginBottom: '12px' }}>
-                                    <h4>Никнейм</h4>
-                                    <p>Ваше отображаемое имя на платформе</p>
+                                    <h4>{t('nickname_label')}</h4>
+                                    <p>{t('nickname_desc')}</p>
                                 </div>
                                 <input 
                                     type="text"
                                     className="auth-input" 
                                     style={{ margin: 0, padding: '12px' }}
-                                    placeholder="Ваш никнейм"
+                                    placeholder={t('nickname_ph')}
                                     value={nickname}
                                     onChange={(e) => setNickname(e.target.value)}
                                     onBlur={async () => {
@@ -539,7 +546,7 @@ const Profile = () => {
                                         await supabase.auth.updateUser({ data: { nickname } });
                                     }}
                                 />
-                                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', alignSelf: 'flex-end', marginTop: '4px' }}>Сохраняется автоматически</span>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', alignSelf: 'flex-end', marginTop: '4px' }}>{t('saves_auto')}</span>
                             </div>
 
                             <div className="settings-card">
@@ -577,7 +584,7 @@ const Profile = () => {
                                     const link = window.location.origin + "/user/" + user.id;
                                     if (navigator.clipboard && window.isSecureContext) {
                                         navigator.clipboard.writeText(link);
-                                        alert("Ссылка скопирована!");
+                                        alert(t('link_copied'));
                                     } else {
                                         const textArea = document.createElement("textarea");
                                         textArea.value = link;
@@ -588,9 +595,9 @@ const Profile = () => {
                                         textArea.select();
                                         try {
                                             document.execCommand('copy');
-                                            alert("Ссылка скопирована!");
+                                            alert(t('link_copied'));
                                         } catch (err) {
-                                            alert("Скопируйте ссылку вручную: " + link);
+                                            alert(t('copy_manual') + link);
                                         }
                                         textArea.remove();
                                     }
@@ -598,9 +605,9 @@ const Profile = () => {
                                     <div>
                                         <h4 style={{ color: "#60a5fa", display: 'flex', alignItems: 'center', gap: '8px' }}>
                                             <ShareIcon />
-                                            Поделиться профилем
+                                            {t('share_profile')}
                                         </h4>
-                                        <p>Скопировать ссылку на мою страницу</p>
+                                        <p>{t('copy_link')}</p>
                                     </div>
                                     <LinkIcon />
                                 </div>
@@ -615,7 +622,7 @@ const Profile = () => {
                                 <button onClick={handleDeleteAccount} className="btn-logout" style={{ marginTop: 0 }}>{t('delete_btn')}</button>
                             </div>
 
-                            <h3 style={{ marginTop: '32px' }}>Стиль Аватарки (DiceBear)</h3>
+                            <h3 style={{ marginTop: '32px' }}>{t('avatar_style')}</h3>
                             <div className="settings-card" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))', gap: '10px', padding: '15px' }}>
                                 {['bottts', 'pixel-art', 'adventurer', 'avataaars', 'fun-emoji'].map(style => (
                                     <div 
@@ -648,7 +655,8 @@ const Profile = () => {
                         ];
 
                         return categories.map(cat => {
-                            const itemsInCategory = displayItems.filter(item => item.category === cat.key);
+                            const translatedCat = t(cat.label);
+                            const itemsInCategory = displayItems.filter(item => item.category === cat.key || item.category === translatedCat);
                             if (itemsInCategory.length === 0) return null;
 
                             return (
@@ -674,17 +682,17 @@ const Profile = () => {
                                                             style={{ background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', borderRadius: '8px', padding: '4px 8px', fontSize: '0.75rem', cursor: 'pointer', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', gap: '4px' }}
                                                         >
                                                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-                                                            {item.folder || 'В папку...'}
+                                                            {(item.folder && t(FOLDER_KEYS[item.folder])) || t('folder_assign')}
                                                         </button>
                                                         
                                                         {folderAssignItem === item.id && (
                                                             <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '4px', background: 'var(--bg-color)', border: '1px solid var(--glass-border)', borderRadius: '8px', overflow: 'hidden', minWidth: '120px', boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
                                                                 <button onClick={() => assignFolder(item.id, null)} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.8rem', borderBottom: '1px solid var(--glass-border)' }}>
-                                                                    Убрать из папки
+                                                                    {t('remove_folder')}
                                                                 </button>
                                                                 {FIXED_FOLDERS.map(f => (
                                                                     <button key={f} onClick={() => assignFolder(item.id, f)} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', background: 'transparent', border: 'none', color: 'white', cursor: 'pointer', fontSize: '0.8rem' }} onMouseOver={e => e.currentTarget.style.background='var(--hover-bg)'} onMouseOut={e => e.currentTarget.style.background='transparent'}>
-                                                                        {f}
+                                                                        {t(FOLDER_KEYS[f]) || f}
                                                                     </button>
                                                                 ))}
                                                             </div>
@@ -708,7 +716,7 @@ const Profile = () => {
                         </svg>
                         <p style={{ color: 'var(--text-secondary)', marginBottom: '16px' }}>
                             {activeTab === 'watchlist' ? (
-                                activeFolder === 'all' ? t('empty_watchlist') : `В папке "${activeFolder}" пока пусто.`
+                                activeFolder === 'all' ? t('empty_watchlist') : t('folder_empty')
                              ) :
                              t('empty_ratings')}
                         </p>
@@ -721,21 +729,21 @@ const Profile = () => {
                 <div className="modal-overlay" onClick={() => setShowModal(null)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <div className="modal-content" onClick={e => e.stopPropagation()} style={{ background: 'var(--bg-color)', border: '1px solid var(--glass-border)', borderRadius: '16px', padding: '20px', width: '90%', maxWidth: '400px', maxHeight: '80vh', overflowY: 'auto' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-                            <h3 style={{ margin: 0 }}>{showModal === 'followers' ? 'Подписчики' : 'Подписки'}</h3>
+                            <h3 style={{ margin: 0 }}>{showModal === 'followers' ? t('followers_title') : t('following_title')}</h3>
                             <button onClick={() => setShowModal(null)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                             </button>
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                             {(showModal === 'followers' ? followers : following).length === 0 ? (
-                                <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '20px 0' }}>Список пуст</p>
+                                <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '20px 0' }}>{t('empty_list')}</p>
                             ) : (
                                 (showModal === 'followers' ? followers : following).map(p => (
                                     <Link key={p.id} to={`/user/${p.id}`} style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none', padding: '8px', borderRadius: '8px', background: 'var(--hover-bg)' }} onClick={() => setShowModal(null)}>
                                         <img src={p.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${p.email}&backgroundColor=3b82f6`} alt="avatar" style={{ width: '40px', height: '40px', borderRadius: '50%' }} />
                                         <div style={{ color: 'var(--text-primary)' }}>
                                             <strong>{p.nickname || p.email.split('@')[0]}</strong>
-                                            {p.is_private && <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Профиль скрыт</div>}
+                                            {p.is_private && <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{t('profile_hidden')}</div>}
                                         </div>
                                     </Link>
                                 ))

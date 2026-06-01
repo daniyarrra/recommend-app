@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
+import { parseGenres } from "../utils/filterCatalog";
 import "../styles/slider.css";
 
 const HeroSlider = ({ items }) => {
-    const { t } = useLanguage();
+    const { t, translateGenre } = useLanguage();
     const [currentIndex, setCurrentIndex] = useState(0);
 
     // Выбираем топ 5 элементов с картинками
@@ -44,7 +45,7 @@ const HeroSlider = ({ items }) => {
                         {/* Контент */}
                         <div className="hero-content-wrapper">
                             <div className="hero-info">
-                                <span className="hero-slide-genre">{item.genre}</span>
+                                <span className="hero-slide-genre">{parseGenres(item.genre).map(g => translateGenre(g)).join(", ")}</span>
                                 <h2 className="hero-slide-title">{item.title}</h2>
                                 <p className="hero-slide-desc">{item.description}</p>
 

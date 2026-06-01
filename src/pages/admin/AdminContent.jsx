@@ -5,6 +5,13 @@ import { useCatalog, useInvalidateCatalog } from "../../hooks/useCatalog";
 
 const CATEGORIES = ["Все", "Фильмы", "Сериалы", "Книги", "Музыка"];
 
+const GENRES_BY_CATEGORY = {
+    "Фильмы":  ["Action", "Drama", "Comedy", "Thriller", "Horror", "Sci-Fi", "Fantasy", "Romance", "Animation", "Adventure", "Crime", "Documentary", "Biography", "History", "Mystery", "Family", "Musical", "War"],
+    "Сериалы": ["Drama", "Comedy", "Thriller", "Horror", "Sci-Fi", "Fantasy", "Crime", "Mystery", "Romance", "Action", "Biography", "Documentary", "Family"],
+    "Книги":   ["Fantasy", "Science Fiction", "Romance", "Thriller", "Mystery", "Horror", "Drama", "Biography", "History", "Non-fiction", "Adventure", "Classic", "Poetry", "Children"],
+    "Музыка":  ["Pop", "Rock", "Hip-Hop", "R&B", "Electronic", "Jazz", "Classical", "Country", "Alternative", "Indie", "Blues", "Reggae", "Metal", "Folk", "K-Pop", "Soul", "Dance"],
+};
+
 const emptyItem = {
     title_ru: "", title_en: "", title_kz: "", genre: "", category: "Фильмы",
     description_ru: "", description_en: "", description_kz: "",
@@ -12,9 +19,24 @@ const emptyItem = {
     cast: [], director: []
 };
 
+// Converts any YouTube URL to embed format
+function toYouTubeEmbed(url) {
+    if (!url) return url;
+    // Already embed
+    if (url.includes('youtube.com/embed/')) return url;
+    // youtu.be/VIDEO_ID
+    const shortMatch = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+    if (shortMatch) return `https://www.youtube.com/embed/${shortMatch[1]}`;
+    // youtube.com/watch?v=VIDEO_ID
+    const watchMatch = url.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
+    if (watchMatch) return `https://www.youtube.com/embed/${watchMatch[1]}`;
+    return url;
+}
+
 const AdminContent = () => {
     const { t, language } = useLanguage();
-    const { data: items = [], isLoading: loading, refetch } = useCatalog(language);
+    // Admin always loads raw catalog in 'ru' to see original titles in the table
+    const { data: items = [], isLoading: loading, refetch } = useCatalog('ru');
     const invalidateCatalog = useInvalidateCatalog();
     const [search, setSearch] = useState("");
     const [filterCat, setFilterCat] = useState("Все");
@@ -188,14 +210,23 @@ const AdminContent = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {filtered.map(item => (
+                        {filtered.map(item => {
+                            // Resolve display title: prefer raw_title object, else item.title string
+                            const rawT = item.raw_title || item.title;
+                            const titleRu = typeof rawT === 'object' ? (rawT?.ru || rawT?.en || '') : (rawT || '');
+                            const titleEn = typeof rawT === 'object' ? (rawT?.en || '') : '';
+                            const titleDisplay = titleRu || titleEn || item.title;
+                            return (
                             <tr key={item.id}>
                                 <td style={{ color: 'var(--text-secondary)', fontSize: '0.82rem' }}>{item.id}</td>
                                 <td>
                                     <div className="admin-item-cell">
                                         {item.image && <img src={item.image} alt="" className="admin-item-poster" />}
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
-                                            <span>{item.title}</span>
+                                            <span>{titleDisplay}</span>
+                                            {titleEn && titleEn !== titleRu && (
+                                                <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', opacity: 0.7 }}>{titleEn}</span>
+                                            )}
                                             {item.is_featured && <span className="admin-badge" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24', fontSize: '0.65rem' }}>★ Featured</span>}
                                         </div>
                                     </div>
@@ -213,7 +244,8 @@ const AdminContent = () => {
                                     </div>
                                 </td>
                             </tr>
-                        ))}
+                            );
+                        })}
                     </tbody>
                 </table>
                 {filtered.length === 0 && <div className="admin-empty"><p>{t('admin_no_content')}</p></div>}
@@ -239,8 +271,39 @@ const AdminContent = () => {
                             </div>
                             <div className="admin-form-group">
                                 <label className="admin-form-label">{t('admin_col_genre')} *</label>
-                                <input className="admin-form-input" value={form.genre}
-                                    onChange={e => setForm({...form, genre: e.target.value})} placeholder="Sci-Fi, Drama..." />
+                                <div style={{
+                                    display: 'flex', flexWrap: 'wrap', gap: '6px',
+                                    padding: '10px', background: 'var(--bg-secondary)',
+                                    borderRadius: '8px', border: '1px solid var(--border-color)'
+                                }}>
+                                    {(GENRES_BY_CATEGORY[form.category] || GENRES_BY_CATEGORY["Фильмы"]).map(g => {
+                                        const selected = form.genre.split(',').map(s => s.trim()).includes(g);
+                                        return (
+                                            <button key={g} type="button"
+                                                onClick={() => {
+                                                    const current = form.genre ? form.genre.split(',').map(s => s.trim()).filter(Boolean) : [];
+                                                    const next = selected
+                                                        ? current.filter(x => x !== g)
+                                                        : [...current, g];
+                                                    setForm({...form, genre: next.join(', ')});
+                                                }}
+                                                style={{
+                                                    padding: '4px 12px', borderRadius: '20px',
+                                                    border: `1px solid ${selected ? '#a855f7' : 'var(--border-color)'}`,
+                                                    background: selected ? 'rgba(168,85,247,0.2)' : 'transparent',
+                                                    color: selected ? '#c084fc' : 'var(--text-secondary)',
+                                                    cursor: 'pointer', fontSize: '0.8rem',
+                                                    transition: 'all 0.15s'
+                                                }}
+                                            >{g}</button>
+                                        );
+                                    })}
+                                </div>
+                                {form.genre && (
+                                    <div style={{ marginTop: '6px', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                                        Выбрано: <strong style={{ color: '#c084fc' }}>{form.genre}</strong>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -298,7 +361,13 @@ const AdminContent = () => {
                                 <div className="admin-form-group">
                                     <label className="admin-form-label">{t('admin_trailer_url')}</label>
                                     <input className="admin-form-input" value={form.trailer_url}
-                                        onChange={e => setForm({...form, trailer_url: e.target.value})} placeholder="https://www.youtube.com/embed/..." />
+                                        onChange={e => setForm({...form, trailer_url: toYouTubeEmbed(e.target.value)})}
+                                        placeholder="https://youtu.be/... или youtube.com/watch?v=..." />
+                                    {form.trailer_url && form.trailer_url.includes('/embed/') && (
+                                        <div style={{ marginTop: '4px', fontSize: '0.75rem', color: '#34d399' }}>
+                                            ✓ Ссылка автоматически конвертирована: <span style={{ opacity: 0.8 }}>{form.trailer_url}</span>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="admin-form-group">
                                     <label className="admin-form-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

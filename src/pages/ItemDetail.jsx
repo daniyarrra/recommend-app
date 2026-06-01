@@ -6,6 +6,7 @@ import AudioPlayer from "../components/AudioPlayer";
 import LikeButton from "../components/LikeButton";
 import { useLanguage } from "../context/LanguageContext";
 import { useCatalogItem } from "../hooks/useCatalog";
+import { parseGenres } from "../utils/filterCatalog";
 import "../styles/detail.css";
 
 /* ── SVG Icons ── */
@@ -55,7 +56,7 @@ const PlayIcon = () => (
 );
 
 const ItemDetail = () => {
-    const { t, language, translateCategory } = useLanguage();
+    const { t, language, translateCategory, translateGenre } = useLanguage();
     const { id } = useParams();
     const navigate = useNavigate();
     const { data: item, isLoading: loading, isError } = useCatalogItem(id, language);
@@ -251,7 +252,7 @@ const ItemDetail = () => {
                     <div className="detail-info">
                         <h1 className="detail-title">{item.title}</h1>
                         <div className="detail-meta">
-                            <span className="detail-genre">{item.genre}</span>
+                            <span className="detail-genre">{parseGenres(item.genre).map(g => translateGenre(g)).join(", ")}</span>
                             <span>{translateCategory(item.category)}</span>
                             {viewers > 1 && (
                                 <span style={{ marginLeft: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#10b981', fontSize: '0.85rem', fontWeight: '500', background: 'rgba(16, 185, 129, 0.1)', padding: '2px 8px', borderRadius: '12px' }}>
