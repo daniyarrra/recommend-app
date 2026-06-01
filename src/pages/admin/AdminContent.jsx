@@ -34,7 +34,7 @@ function toYouTubeEmbed(url) {
 }
 
 const AdminContent = () => {
-    const { t, language } = useLanguage();
+    const { t } = useLanguage();
     // Admin always loads raw catalog in 'ru' to see original titles in the table
     const { data: items = [], isLoading: loading, refetch } = useCatalog('ru');
     const invalidateCatalog = useInvalidateCatalog();
