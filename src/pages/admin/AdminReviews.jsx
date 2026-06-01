@@ -23,7 +23,7 @@ const isSuspicious = (text) => {
 
 const AdminReviews = () => {
     const { t, language } = useLanguage();
-    const { data: items = [], isLoading: catalogLoading } = useCatalog(language);
+    const { data: items = [] } = useCatalog(language);
     const [reviews, setReviews] = useState([]);
     const [search, setSearch] = useState("");
     const [filterRating, setFilterRating] = useState(0); // 0 = all
@@ -88,7 +88,7 @@ const AdminReviews = () => {
         return matchSearch && matchRating && matchSuspicious;
     });
 
-    if (loading || catalogLoading) {
+    if (loading) {
         return <div className="admin-loading"><div className="loading-spinner"></div><span>{t('loading')}</span></div>;
     }
 
