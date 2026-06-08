@@ -152,6 +152,13 @@ export const translations = {
     admin_unban: "Разбан",
     admin_make_admin: "Сделать админом",
     admin_remove_admin: "Снять админа",
+    admin_make_manager: "Сделать менеджером",
+    admin_remove_manager: "Снять менеджера",
+    admin_role_manager: "Менеджер",
+    admin_confirm_make_manager: "Назначить менеджером?",
+    admin_confirm_remove_manager: "Снять роль менеджера?",
+    manager_panel: "Менеджер-панель",
+    nav_manager: "Менеджер",
     admin_no_users: "Пользователи не найдены",
     admin_confirm_title: "Подтверждение",
     admin_confirm_ban: "Заблокировать пользователя?",
@@ -223,7 +230,28 @@ export const translations = {
     avatar_updated: "Аватарка успешно обновлена!",
     avatar_upload_error: "Ошибка загрузки. Убедитесь, что вы создали публичный бакет 'avatars' в Supabase Storage.",
     avatar_style_error: "Ошибка при выборе стиля.",
-    error_delete_account: "Ошибка: "
+    error_delete_account: "Ошибка: ",
+    // Footer
+    footer_explore: "Изучить",
+    footer_account: "Аккаунт",
+    footer_rights: "Все права защищены.",
+    // Notifications
+    notifications_title: "Уведомления",
+    no_notifications: "У вас пока нет уведомлений.",
+    user_unknown: "Пользователь",
+    notif_like: " оценил(а) ваш отзыв! ❤️",
+    notif_follow: " подписался(ась) на вас!",
+    // Dashboard new strings
+    dash_content_by_cat: "Контент по категориям",
+    dash_cat_filter: "Фильтр по категории",
+    dash_stats_for: "Статистика:",
+    dash_records: "записей",
+    dash_rating_dist: "Распределение оценок",
+    dash_items_count: "шт.",
+    dash_cat_movies: "🎬 Фильмы",
+    dash_cat_tv: "📺 Сериалы",
+    dash_cat_books: "📚 Книги",
+    dash_cat_music: "🎵 Музыка"
   },
   en: {
     // AI
@@ -376,6 +404,13 @@ export const translations = {
     admin_unban: "Unban",
     admin_make_admin: "Make Admin",
     admin_remove_admin: "Remove Admin",
+    admin_make_manager: "Make Manager",
+    admin_remove_manager: "Remove Manager",
+    admin_role_manager: "Manager",
+    admin_confirm_make_manager: "Make this user a manager?",
+    admin_confirm_remove_manager: "Remove manager role?",
+    manager_panel: "Manager Panel",
+    nav_manager: "Manager",
     admin_no_users: "No users found",
     admin_confirm_title: "Confirmation",
     admin_confirm_ban: "Ban this user?",
@@ -447,7 +482,28 @@ export const translations = {
     avatar_updated: "Avatar updated successfully!",
     avatar_upload_error: "Upload error. Make sure you've created a public 'avatars' bucket in Supabase Storage.",
     avatar_style_error: "Error selecting style.",
-    error_delete_account: "Error: "
+    error_delete_account: "Error: ",
+    // Footer
+    footer_explore: "Explore",
+    footer_account: "Account",
+    footer_rights: "All rights reserved.",
+    // Notifications
+    notifications_title: "Notifications",
+    no_notifications: "You have no notifications yet.",
+    user_unknown: "User",
+    notif_like: " liked your review! ❤️",
+    notif_follow: " followed you!",
+    // Dashboard new strings
+    dash_content_by_cat: "Content by Categories",
+    dash_cat_filter: "Filter by Category",
+    dash_stats_for: "Statistics:",
+    dash_records: "records",
+    dash_rating_dist: "Rating Distribution",
+    dash_items_count: "items",
+    dash_cat_movies: "🎬 Movies",
+    dash_cat_tv: "📺 TV Series",
+    dash_cat_books: "📚 Books",
+    dash_cat_music: "🎵 Music"
   },
   kz: {
     // AI
@@ -549,7 +605,7 @@ export const translations = {
     register_link: "Тіркелу",
     login_error: "Кіру қатесі: ",
     // Register
-    register_title: "Аккаунт жасау",
+    register_title: "Аккаунт ашу",
     nickname_placeholder: "Сіздің Лақап атыңыз",
     password_hint: "Құпия сөз ойлап табыңыз (кемінде 6 таңба)",
     register_btn: "Тіркелу",
@@ -600,6 +656,13 @@ export const translations = {
     admin_unban: "Бұғаттан шығару",
     admin_make_admin: "Әкімші ету",
     admin_remove_admin: "Әкімшіні алып тастау",
+    admin_make_manager: "Менеджер ету",
+    admin_remove_manager: "Менеджерді алып тастау",
+    admin_role_manager: "Менеджер",
+    admin_confirm_make_manager: "Менеджер ету керек пе?",
+    admin_confirm_remove_manager: "Менеджер рөлін алып тастау керек пе?",
+    manager_panel: "Менеджер-панелі",
+    nav_manager: "Менеджер",
     admin_no_users: "Пайдаланушылар табылмады",
     admin_confirm_title: "Растау",
     admin_confirm_ban: "Пайдаланушыны бұғаттау керек пе?",
@@ -671,7 +734,28 @@ export const translations = {
     avatar_updated: "Аватар сәтті жаңартылды!",
     avatar_upload_error: "Жүктеу қатесі. Supabase Storage-да 'avatars' бакетін жасағаныңызды тексеріңіз.",
     avatar_style_error: "Стильді таңдау қатесі.",
-    error_delete_account: "Қате: "
+    error_delete_account: "Қате: ",
+    // Footer
+    footer_explore: "Зерттеу",
+    footer_account: "Аккаунт",
+    footer_rights: "Барлық құқықтар қорғалған.",
+    // Notifications
+    notifications_title: "Хабарландырулар",
+    no_notifications: "Әзірге хабарландырулар жоқ.",
+    user_unknown: "Пайдаланушы",
+    notif_like: " сіздің пікіріңізді бағалады! ❤️",
+    notif_follow: " сізге жазылды!",
+    // Dashboard new strings
+    dash_content_by_cat: "Санат бойынша контент",
+    dash_cat_filter: "Санат бойынша сүзгі",
+    dash_stats_for: "Статистика:",
+    dash_records: "жазба",
+    dash_rating_dist: "Бағалар үлестірімі",
+    dash_items_count: "дана",
+    dash_cat_movies: "🎬 Фильмдер",
+    dash_cat_tv: "📺 Сериалдар",
+    dash_cat_books: "📚 Кітаптар",
+    dash_cat_music: "🎵 Музыка"
   }
 };
 
@@ -742,7 +826,7 @@ export const LanguageProvider = ({ children }) => {
     'триллер': { ru: 'Триллер', en: 'Thriller', kz: 'Триллер' },
     'western': { ru: 'Вестерн', en: 'Western', kz: 'Вестерн' },
     'вестерн': { ru: 'Вестерн', en: 'Western', kz: 'Вестерн' },
-    
+
     // Music and Books
     'alternative': { ru: 'Альтернатива', en: 'Alternative', kz: 'Альтернатива' },
     'blues': { ru: 'Блюз', en: 'Blues', kz: 'Блюз' },
@@ -761,7 +845,33 @@ export const LanguageProvider = ({ children }) => {
     'science fiction': { ru: 'Научная фантастика', en: 'Science Fiction', kz: 'Ғылыми фантастика' },
     'mystery': { ru: 'Детектив', en: 'Mystery', kz: 'Детектив' },
     'novel': { ru: 'Роман', en: 'Novel', kz: 'Роман' },
-    'non-fiction': { ru: 'Нон-фикшн', en: 'Non-fiction', kz: 'Нон-фикшн' }
+    'non-fiction': { ru: 'Нон-фикшн', en: 'Non-fiction', kz: 'Нон-фикшн' },
+
+    // Additions for missing genres from Admin and AI fill
+    'crime': { ru: 'Криминал', en: 'Crime', kz: 'Криминал' },
+    'musical': { ru: 'Мюзикл', en: 'Musical', kz: 'Мюзикл' },
+    'war': { ru: 'Военный', en: 'War', kz: 'Әскери' },
+    'classic': { ru: 'Классика', en: 'Classic', kz: 'Классика' },
+    'poetry': { ru: 'Поэзия', en: 'Poetry', kz: 'Поэзия' },
+    'children': { ru: 'Детская литература', en: 'Children', kz: 'Балалар әдебиеті' },
+    'hip-hop': { ru: 'Хип-хоп', en: 'Hip-Hop', kz: 'Хип-хоп' },
+    'jazz': { ru: 'Джаз', en: 'Jazz', kz: 'Джаз' },
+    'classical': { ru: 'Классическая', en: 'Classical', kz: 'Классикалық' },
+    'indie': { ru: 'Инди', en: 'Indie', kz: 'Инди' },
+    'reggae': { ru: 'Регги', en: 'Reggae', kz: 'Регги' },
+    'historical fiction': { ru: 'Исторический роман', en: 'Historical Fiction', kz: 'Тарихи роман' },
+    'biographical fiction': { ru: 'Биографический роман', en: 'Biographical Fiction', kz: 'Өмірбаяндық роман' },
+    'education': { ru: 'Образование', en: 'Education', kz: 'Білім' },
+    'finance': { ru: 'Финансы', en: 'Finance', kz: 'Қаржы' },
+    'self-help': { ru: 'Саморазвитие', en: 'Self-Help', kz: 'Өзін-өзі дамыту' },
+
+    // Additional music and miscellaneous genres
+    'house': { ru: 'Хаус', en: 'House', kz: 'Хаус' },
+    'musicals': { ru: 'Мюзиклы', en: 'Musicals', kz: 'Мюзиклдер' },
+    'singer': { ru: 'Исполнитель', en: 'Singer', kz: 'Орындаушы' },
+    'songwriter': { ru: 'Автор песен', en: 'Songwriter', kz: 'Ән авторы' },
+    'singer/songwriter': { ru: 'Автор-исполнитель', en: 'Singer/Songwriter', kz: 'Автор-орындаушы' },
+    'vocal': { ru: 'Вокал', en: 'Vocal', kz: 'Вокал' }
   };
 
   const translateGenre = (genre) => {

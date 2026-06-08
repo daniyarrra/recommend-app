@@ -113,6 +113,7 @@ const Navbar = () => {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
     const [isAdmin, setIsAdmin] = useState(false);
+    const [isManager, setIsManager] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
     const [showNotifications, setShowNotifications] = useState(false);
     const [theme, setTheme] = useState(document.documentElement.getAttribute("data-theme") || "dark");
@@ -124,10 +125,11 @@ const Navbar = () => {
             if (session?.user) {
                 const { data } = await supabase
                     .from("profiles")
-                    .select("is_admin")
+                    .select("is_admin, is_manager")
                     .eq("id", session.user.id)
                     .maybeSingle();
                 setIsAdmin(data?.is_admin || false);
+                setIsManager(data?.is_manager || false);
 
                 // Fetch unread notifications
                 try {
@@ -140,6 +142,7 @@ const Navbar = () => {
                 } catch(e) {}
             } else {
                 setIsAdmin(false);
+                setIsManager(false);
                 setUnreadCount(0);
             }
         };
@@ -211,11 +214,11 @@ const Navbar = () => {
                 <div className="navbar-auth">
                     {user ? (
                         <>
-                            {isAdmin && (
+                            {(isAdmin || isManager) && (
                                 <Link to="/admin" className={location.pathname.startsWith('/admin') ? 'nav-btn nav-btn-outline active' : 'nav-btn nav-btn-outline'}
-                                    style={{ borderColor: 'rgba(139, 92, 246, 0.3)', color: '#a78bfa' }}>
+                                    style={{ borderColor: isAdmin ? 'rgba(139, 92, 246, 0.3)' : 'rgba(16, 185, 129, 0.3)', color: isAdmin ? '#a78bfa' : '#34d399' }}>
                                     <IconAdmin />
-                                    <span>{t('nav_admin')}</span>
+                                    <span>{isAdmin ? t('nav_admin') : t('nav_manager')}</span>
                                 </Link>
                             )}
                             <select 

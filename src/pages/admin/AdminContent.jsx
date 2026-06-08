@@ -34,7 +34,7 @@ function toYouTubeEmbed(url) {
 }
 
 const AdminContent = () => {
-    const { t } = useLanguage();
+    const { t, translateGenre } = useLanguage();
     // Admin always loads raw catalog in 'ru' to see original titles in the table
     const { data: items = [], isLoading: loading, refetch } = useCatalog('ru');
     const invalidateCatalog = useInvalidateCatalog();
@@ -232,7 +232,7 @@ const AdminContent = () => {
                                     </div>
                                 </td>
                                 <td><span className="admin-badge admin-badge-category">{item.category}</span></td>
-                                <td style={{ color: 'var(--text-secondary)' }}>{item.genre}</td>
+                                <td style={{ color: 'var(--text-secondary)' }}>{item.genre ? item.genre.split(',').map(g => translateGenre(g.trim())).join(', ') : ''}</td>
                                 <td>
                                     <div className="admin-actions">
                                         <button className="admin-btn admin-btn-sm admin-btn-ghost" onClick={() => openEdit(item)}>
@@ -295,13 +295,13 @@ const AdminContent = () => {
                                                     cursor: 'pointer', fontSize: '0.8rem',
                                                     transition: 'all 0.15s'
                                                 }}
-                                            >{g}</button>
+                                            >{translateGenre(g)}</button>
                                         );
                                     })}
                                 </div>
                                 {form.genre && (
                                     <div style={{ marginTop: '6px', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                                        Выбрано: <strong style={{ color: '#c084fc' }}>{form.genre}</strong>
+                                        Выбрано: <strong style={{ color: '#c084fc' }}>{form.genre.split(',').map(g => translateGenre(g.trim())).join(', ')}</strong>
                                     </div>
                                 )}
                             </div>

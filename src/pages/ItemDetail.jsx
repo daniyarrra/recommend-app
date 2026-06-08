@@ -62,6 +62,13 @@ const ItemDetail = () => {
     const { data: item, isLoading: loading, isError } = useCatalogItem(id, language);
     const [viewers, setViewers] = useState(1);
     
+    const FOLDER_KEYS = {
+        'В планах': 'folder_planned',
+        'Смотрю': 'folder_watching',
+        'Просмотрено': 'folder_watched',
+        'Брошено': 'folder_dropped'
+    };
+    
     // Состояния для Watchlist
     const [user, setUser] = useState(null);
     const [inWatchlist, setInWatchlist] = useState(false);
@@ -366,7 +373,7 @@ const ItemDetail = () => {
                                             style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', color: 'var(--text-primary)', padding: '0 16px', borderRadius: '12px', height: '48px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, backdropFilter: 'blur(12px)' }}
                                         >
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-                                            {itemFolder || 'Без папки'}
+                                            {itemFolder ? t(FOLDER_KEYS[itemFolder]) : t('folder_unsorted')}
                                         </button>
                                         {showFolderDropdown && (
                                             <div style={{ position: 'absolute', bottom: 'calc(100% + 4px)', top: 'auto', left: 0, background: 'var(--bg-color)', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '8px', zIndex: 1000, minWidth: '160px', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
@@ -378,7 +385,7 @@ const ItemDetail = () => {
                                                         onMouseOver={e=>e.currentTarget.style.background = itemFolder === f ? 'var(--accent-color)' : 'var(--hover-bg)'}
                                                         onMouseOut={e=>e.currentTarget.style.background = itemFolder === f ? 'var(--accent-color)' : 'transparent'}
                                                     >
-                                                        {f}
+                                                        {t(FOLDER_KEYS[f])}
                                                     </button>
                                                 ))}
                                                 <div style={{ height: '1px', background: 'var(--glass-border)', margin: '4px 0' }}></div>
@@ -388,7 +395,7 @@ const ItemDetail = () => {
                                                     onMouseOver={e=>e.currentTarget.style.background='var(--hover-bg)'}
                                                     onMouseOut={e=>e.currentTarget.style.background='transparent'}
                                                 >
-                                                    Убрать из папки
+                                                    {t('remove_folder')}
                                                 </button>
                                             </div>
                                         )}

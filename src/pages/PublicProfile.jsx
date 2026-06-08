@@ -16,6 +16,7 @@ const PublicProfile = () => {
     const [savedItems, setSavedItems] = useState([]);
     const [ratedItems, setRatedItems] = useState([]);
     const [activeTab, setActiveTab] = useState("watchlist");
+    const [activeFolder, setActiveFolder] = useState("all");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -78,13 +79,18 @@ const PublicProfile = () => {
                 // 3. Load Watchlist
                 const { data: watchlistData } = await supabase
                     .from("watchlist")
-                    .select("item_id")
+                    .select("item_id, folder")
                     .eq("user_id", id);
                 
                 let sItems = [];
                 if (watchlistData) {
-                    const savedIds = watchlistData.map(w => w.item_id);
-                    sItems = allItems.filter(item => savedIds.includes(item.id));
+                    const savedMap = {};
+                    watchlistData.forEach(w => { savedMap[w.item_id] = w.folder || null; });
+                    const savedIds = Object.keys(savedMap);
+                    sItems = allItems.filter(item => savedIds.includes(item.id.toString())).map(item => ({
+                        ...item,
+                        folder: savedMap[item.id]
+                    }));
                     setSavedItems(sItems);
                 }
 
@@ -170,6 +176,14 @@ const PublicProfile = () => {
                     follower_id: currentUser.id,
                     following_id: id
                 });
+                
+                // Add notification
+                await supabase.from("notifications").insert({
+                    user_id: id,          // The person being followed
+                    actor_id: currentUser.id, // The person who followed
+                    type: 'follow'
+                });
+
                 setIsFollowing(true);
                 setFollowersCount(prev => prev + 1);
             }
@@ -181,11 +195,20 @@ const PublicProfile = () => {
     };
 
     const avatarUrl = profile.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${profile.email}&backgroundColor=3b82f6`;
-    const displayItems = activeTab === "watchlist" ? savedItems :
-                         activeTab === "favorites" ? ratedItems.filter(i => i.userRating >= 5) :
-                         activeTab === "watched" ? ratedItems.filter(i => i.userRating >= 3 && i.userRating < 5) :
-                         activeTab === "terrible" ? ratedItems.filter(i => i.userRating <= 2) :
-                         activeTab === "ratings" ? ratedItems : [];
+    
+    const FIXED_FOLDERS = ['В планах', 'Смотрю', 'Просмотрено', 'Брошено'];
+    const FOLDER_KEYS = {
+        'В планах': 'folder_planned',
+        'Смотрю': 'folder_watching',
+        'Просмотрено': 'folder_watched',
+        'Брошено': 'folder_dropped'
+    };
+
+    const displayItems = activeTab === "watchlist" ? (
+        activeFolder === "all" ? savedItems :
+        activeFolder === "unsorted" ? savedItems.filter(i => !i.folder) :
+        savedItems.filter(i => i.folder === activeFolder)
+    ) : activeTab === "ratings" ? ratedItems.sort((a, b) => b.userRating - a.userRating) : [];
 
     return (
         <div className="profile-page">
@@ -257,27 +280,54 @@ const PublicProfile = () => {
                         {t('tab_watchlist')}
                     </button>
                     <button 
-                        className={`profile-tab ${activeTab === 'favorites' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('favorites')}
+                        className={`profile-tab ${activeTab === 'ratings' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('ratings')}
                         style={{ whiteSpace: 'nowrap' }}
                     >
-                        Любимые (5★)
-                    </button>
-                    <button 
-                        className={`profile-tab ${activeTab === 'watched' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('watched')}
-                        style={{ whiteSpace: 'nowrap' }}
-                    >
-                        Просмотренные (3-4★)
-                    </button>
-                    <button 
-                        className={`profile-tab ${activeTab === 'terrible' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('terrible')}
-                        style={{ whiteSpace: 'nowrap' }}
-                    >
-                        Ужасные (1-2★)
+                        {t('tab_my_ratings')}
                     </button>
                 </div>
+
+                {activeTab === 'watchlist' && (
+                    <div style={{ marginTop: '20px', display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '12px', alignItems: 'center', scrollbarWidth: 'none' }}>
+                        <button 
+                            onClick={() => setActiveFolder('all')}
+                            style={{ 
+                                fontSize: '0.85rem', padding: '6px 14px', borderRadius: '20px', cursor: 'pointer', fontWeight: 600, border: '1px solid', transition: 'all 0.2s', whiteSpace: 'nowrap',
+                                background: activeFolder === 'all' ? 'var(--accent-color)' : 'transparent',
+                                color: activeFolder === 'all' ? 'white' : 'var(--text-secondary)',
+                                borderColor: activeFolder === 'all' ? 'var(--accent-color)' : 'var(--glass-border)'
+                            }}
+                        >
+                            {t('folder_all')}
+                        </button>
+                        <button 
+                            onClick={() => setActiveFolder('unsorted')}
+                            style={{ 
+                                fontSize: '0.85rem', padding: '6px 14px', borderRadius: '20px', cursor: 'pointer', fontWeight: 600, border: '1px solid', transition: 'all 0.2s', whiteSpace: 'nowrap',
+                                background: activeFolder === 'unsorted' ? 'var(--accent-color)' : 'transparent',
+                                color: activeFolder === 'unsorted' ? 'white' : 'var(--text-secondary)',
+                                borderColor: activeFolder === 'unsorted' ? 'var(--accent-color)' : 'var(--glass-border)'
+                            }}
+                        >
+                            {t('folder_unsorted')}
+                        </button>
+                        {FIXED_FOLDERS.map(folder => (
+                            <button 
+                                key={folder}
+                                onClick={() => setActiveFolder(folder)}
+                                style={{ 
+                                    fontSize: '0.85rem', padding: '6px 14px', borderRadius: '20px', cursor: 'pointer', fontWeight: 600, border: '1px solid', transition: 'all 0.2s', whiteSpace: 'nowrap',
+                                    background: activeFolder === folder ? 'var(--accent-color)' : 'transparent',
+                                    color: activeFolder === folder ? 'white' : 'var(--text-secondary)',
+                                    borderColor: activeFolder === folder ? 'var(--accent-color)' : 'var(--glass-border)'
+                                }}
+                            >
+                                {t(FOLDER_KEYS[folder]) || folder}
+                            </button>
+                        ))}
+                    </div>
+                )}
 
                 {displayItems.length > 0 ? (
                     (() => {
@@ -316,11 +366,10 @@ const PublicProfile = () => {
                 ) : (
                     <div className="empty-state">
                         <p style={{ color: 'var(--text-secondary)', marginBottom: '16px' }}>
-                            {activeTab === 'watchlist' ? 'Пользователь еще ничего не добавил в Watchlist' :
-                             activeTab === 'favorites' ? 'У пользователя пока нет любимых фильмов.' :
-                             activeTab === 'watched' ? 'Пользователь еще не оценил фильмы на 3 или 4 звезды.' :
-                             activeTab === 'terrible' ? 'Здесь пусто.' :
-                             'Список пуст'}
+                            {activeTab === 'watchlist' ? (
+                                activeFolder === 'all' ? t('empty_watchlist') : t('folder_empty')
+                             ) :
+                             t('empty_ratings')}
                         </p>       </div>
                 )}
             </div>

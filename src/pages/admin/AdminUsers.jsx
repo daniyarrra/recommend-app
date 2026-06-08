@@ -1,13 +1,21 @@
 import { useEffect, useState } from "react";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { supabase } from "../../services/supabase";
 import { useLanguage } from "../../context/LanguageContext";
 
 const AdminUsers = () => {
     const { t } = useLanguage();
+    const navigate = useNavigate();
+    const { role } = useOutletContext() || {};
     const [users, setUsers] = useState([]);
     const [search, setSearch] = useState("");
     const [loading, setLoading] = useState(true);
-    const [confirmAction, setConfirmAction] = useState(null); // { type, user }
+    const [confirmAction, setConfirmAction] = useState(null);
+
+    // Managers cannot access Users — redirect to Content
+    useEffect(() => {
+        if (role === 'manager') navigate('/admin/content', { replace: true });
+    }, [role, navigate]);
 
     const fetchUsers = async () => {
         try {
@@ -15,7 +23,7 @@ const AdminUsers = () => {
             let data = null;
             let res = await supabase
                 .from("profiles")
-                .select("id, email, is_admin, is_banned, avatar_url, created_at")
+                .select("id, email, is_admin, is_manager, is_banned, avatar_url, created_at")
                 .order("created_at", { ascending: false });
 
             if (res.error) {
@@ -24,7 +32,7 @@ const AdminUsers = () => {
                 res = await supabase
                     .from("profiles")
                     .select("id, email, is_admin, avatar_url");
-                data = (res.data || []).map(u => ({ ...u, is_banned: false, created_at: null }));
+                data = (res.data || []).map(u => ({ ...u, is_banned: false, is_manager: false, created_at: null }));
             } else {
                 data = res.data || [];
             }
@@ -44,18 +52,6 @@ const AdminUsers = () => {
 
     useEffect(() => { fetchUsers(); }, []);
 
-    const handleBan = async (user) => {
-        const newVal = !user.is_banned;
-        const { error } = await supabase.rpc('admin_set_ban', { target_uid: user.id, ban_status: newVal });
-        if (!error) {
-            setUsers(prev => prev.map(u => u.id === user.id ? { ...u, is_banned: newVal } : u));
-        } else {
-            console.error("Ban error:", error);
-            alert("Ошибка при изменении статуса блокировки");
-        }
-        setConfirmAction(null);
-    };
-
     const handleToggleAdmin = async (user) => {
         const newVal = !user.is_admin;
         const { error } = await supabase.rpc('admin_set_role', { target_uid: user.id, make_admin: newVal });
@@ -64,6 +60,18 @@ const AdminUsers = () => {
         } else {
             console.error("Role error:", error);
             alert("Ошибка при изменении роли");
+        }
+        setConfirmAction(null);
+    };
+
+    const handleToggleManager = async (user) => {
+        const newVal = !user.is_manager;
+        const { error } = await supabase.rpc('admin_set_manager', { target_uid: user.id, make_manager: newVal });
+        if (!error) {
+            setUsers(prev => prev.map(u => u.id === user.id ? { ...u, is_manager: newVal } : u));
+        } else {
+            console.error("Manager role error:", error);
+            alert("Ошибка при изменении роли менеджера");
         }
         setConfirmAction(null);
     };
@@ -114,7 +122,6 @@ const AdminUsers = () => {
                         <tr>
                             <th>{t('admin_col_user')}</th>
                             <th>{t('admin_col_reviews')}</th>
-                            <th>{t('admin_col_status')}</th>
                             <th>{t('admin_col_role')}</th>
                             <th>{t('admin_col_registered')}</th>
                             <th>{t('admin_col_actions')}</th>
@@ -134,13 +141,8 @@ const AdminUsers = () => {
                                 </td>
                                 <td>{user.reviewCount}</td>
                                 <td>
-                                    {user.is_banned
-                                        ? <span className="admin-badge admin-badge-banned">{t('admin_banned')}</span>
-                                        : <span className="admin-badge admin-badge-active">{t('admin_active')}</span>
-                                    }
-                                </td>
-                                <td>
                                     {user.is_admin && <span className="admin-badge admin-badge-admin">{t('admin_role_admin')}</span>}
+                                    {user.is_manager && <span className="admin-badge admin-badge-manager">{t('admin_role_manager')}</span>}
                                 </td>
                                 <td style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
                                     {user.created_at ? new Date(user.created_at).toLocaleDateString() : "—"}
@@ -148,16 +150,17 @@ const AdminUsers = () => {
                                 <td>
                                     <div className="admin-actions">
                                         <button
-                                            className={`admin-btn admin-btn-sm ${user.is_banned ? 'admin-btn-ghost' : 'admin-btn-danger'}`}
-                                            onClick={() => setConfirmAction({ type: 'ban', user })}
-                                        >
-                                            {user.is_banned ? t('admin_unban') : t('admin_ban')}
-                                        </button>
-                                        <button
                                             className="admin-btn admin-btn-sm admin-btn-ghost"
                                             onClick={() => setConfirmAction({ type: 'role', user })}
                                         >
                                             {user.is_admin ? t('admin_remove_admin') : t('admin_make_admin')}
+                                        </button>
+                                        <button
+                                            className="admin-btn admin-btn-sm admin-btn-ghost"
+                                            style={{ borderColor: 'rgba(16, 185, 129, 0.2)', color: user.is_manager ? '#f87171' : '#34d399' }}
+                                            onClick={() => setConfirmAction({ type: 'manager', user })}
+                                        >
+                                            {user.is_manager ? t('admin_remove_manager') : t('admin_make_manager')}
                                         </button>
                                         <button
                                             className="admin-btn admin-btn-sm admin-btn-danger"
@@ -183,10 +186,10 @@ const AdminUsers = () => {
                     <div className="admin-modal" onClick={e => e.stopPropagation()}>
                         <h2>{t('admin_confirm_title')}</h2>
                         <p>
-                            {confirmAction.type === 'ban' && (confirmAction.user.is_banned
-                                ? t('admin_confirm_unban') : t('admin_confirm_ban'))}
                             {confirmAction.type === 'role' && (confirmAction.user.is_admin
                                 ? t('admin_confirm_remove_admin') : t('admin_confirm_make_admin'))}
+                            {confirmAction.type === 'manager' && (confirmAction.user.is_manager
+                                ? t('admin_confirm_remove_manager') : t('admin_confirm_make_manager'))}
                             {confirmAction.type === 'delete' && t('admin_confirm_delete_user')}
                             <br/><strong>{confirmAction.user.email}</strong>
                         </p>
@@ -197,8 +200,8 @@ const AdminUsers = () => {
                             <button
                                 className={`admin-btn ${confirmAction.type === 'delete' ? 'admin-btn-danger' : 'admin-btn-primary'}`}
                                 onClick={() => {
-                                    if (confirmAction.type === 'ban') handleBan(confirmAction.user);
                                     if (confirmAction.type === 'role') handleToggleAdmin(confirmAction.user);
+                                    if (confirmAction.type === 'manager') handleToggleManager(confirmAction.user);
                                     if (confirmAction.type === 'delete') handleDelete(confirmAction.user);
                                 }}
                             >

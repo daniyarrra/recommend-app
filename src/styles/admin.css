@@ -294,6 +294,11 @@
   color: #a78bfa;
 }
 
+.admin-badge-manager {
+  background: rgba(16, 185, 129, 0.12);
+  color: #34d399;
+}
+
 .admin-badge-category {
   background: rgba(59, 130, 246, 0.12);
   color: #60a5fa;

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 import { supabase } from "../../services/supabase";
 import { useLanguage } from "../../context/LanguageContext";
 import "../../styles/admin.css";
@@ -36,31 +37,34 @@ const IconShield = () => (
 );
 
 const AdminLayout = () => {
-    const [isAdmin, setIsAdmin] = useState(null); // null = loading
+    const [role, setRole] = useState(null); // null=loading, 'admin', 'manager', 'none'
     const navigate = useNavigate();
+    const location = useLocation();
     const { t } = useLanguage();
 
     useEffect(() => {
-        const checkAdmin = async () => {
+        const checkRole = async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) { navigate("/login"); return; }
 
             const { data } = await supabase
                 .from("profiles")
-                .select("is_admin")
+                .select("is_admin, is_manager")
                 .eq("id", session.user.id)
                 .maybeSingle();
 
             if (data?.is_admin) {
-                setIsAdmin(true);
+                setRole('admin');
+            } else if (data?.is_manager) {
+                setRole('manager');
             } else {
-                setIsAdmin(false);
+                setRole('none');
             }
         };
-        checkAdmin();
+        checkRole();
     }, [navigate]);
 
-    if (isAdmin === null) {
+    if (role === null) {
         return (
             <div className="admin-loading">
                 <div className="loading-spinner"></div>
@@ -69,7 +73,7 @@ const AdminLayout = () => {
         );
     }
 
-    if (!isAdmin) {
+    if (role === 'none') {
         return (
             <div className="admin-denied">
                 <IconShield />
@@ -80,25 +84,57 @@ const AdminLayout = () => {
         );
     }
 
+    const isAdmin = role === 'admin';
+    const isManager = role === 'manager';
+
     return (
         <div className="admin-layout">
             <aside className="admin-sidebar">
-                <p className="admin-sidebar-title">{t('admin_panel')}</p>
-                <NavLink to="/admin" end className={({isActive}) => `admin-nav-link ${isActive ? 'active' : ''}`}>
-                    <IconDashboard /> {t('admin_dashboard')}
-                </NavLink>
-                <NavLink to="/admin/users" className={({isActive}) => `admin-nav-link ${isActive ? 'active' : ''}`}>
-                    <IconUsers /> {t('admin_users')}
-                </NavLink>
-                <NavLink to="/admin/content" className={({isActive}) => `admin-nav-link ${isActive ? 'active' : ''}`}>
-                    <IconContent /> {t('admin_content')}
-                </NavLink>
-                <NavLink to="/admin/reviews" className={({isActive}) => `admin-nav-link ${isActive ? 'active' : ''}`}>
-                    <IconReviews /> {t('admin_reviews')}
-                </NavLink>
+                <p className="admin-sidebar-title">
+                    {isAdmin ? t('admin_panel') : t('manager_panel')}
+                </p>
+
+                {/* Dashboard — admin only */}
+                {isAdmin && (
+                    <NavLink to="/admin" end className={({isActive}) => `admin-nav-link ${isActive ? 'active' : ''}`}>
+                        <IconDashboard /> {t('admin_dashboard')}
+                    </NavLink>
+                )}
+
+                {/* Users — admin only */}
+                {isAdmin && (
+                    <NavLink to="/admin/users" className={({isActive}) => `admin-nav-link ${isActive ? 'active' : ''}`}>
+                        <IconUsers /> {t('admin_users')}
+                    </NavLink>
+                )}
+
+                {/* Content — manager only (and admin too, for full access) */}
+                {(isManager || isAdmin) && (
+                    <NavLink to="/admin/content" className={({isActive}) => `admin-nav-link ${isActive ? 'active' : ''}`}>
+                        <IconContent /> {t('admin_content')}
+                    </NavLink>
+                )}
+
+                {/* Reviews — manager only (and admin too) */}
+                {(isManager || isAdmin) && (
+                    <NavLink to="/admin/reviews" className={({isActive}) => `admin-nav-link ${isActive ? 'active' : ''}`}>
+                        <IconReviews /> {t('admin_reviews')}
+                    </NavLink>
+                )}
             </aside>
             <main className="admin-main">
-                <Outlet />
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={location.pathname}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2, ease: "easeInOut" }}
+                        style={{ willChange: "opacity" }}
+                    >
+                        <Outlet context={{ role }} />
+                    </motion.div>
+                </AnimatePresence>
             </main>
         </div>
     );

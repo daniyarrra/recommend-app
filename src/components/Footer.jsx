@@ -53,7 +53,7 @@ const Footer = () => {
                     </div>
                     
                     <div className="footer-links-group">
-                        <h4 className="footer-heading">Explore</h4>
+                        <h4 className="footer-heading">{t('footer_explore')}</h4>
                         <Link to="/" className="footer-link">{t('nav_movies') || 'Movies'}</Link>
                         <Link to="/books" className="footer-link">{t('nav_books') || 'Books'}</Link>
                         <Link to="/music" className="footer-link">{t('nav_music') || 'Music'}</Link>
@@ -61,14 +61,14 @@ const Footer = () => {
                     </div>
 
                     <div className="footer-links-group">
-                        <h4 className="footer-heading">Account</h4>
+                        <h4 className="footer-heading">{t('footer_account')}</h4>
                         <Link to="/profile" className="footer-link">{t('nav_profile') || 'Profile'}</Link>
                         <Link to="/login" className="footer-link">{t('nav_login') || 'Login'}</Link>
                         <Link to="/register" className="footer-link">{t('nav_register') || 'Register'}</Link>
                     </div>
                 </div>
                 <div className="footer-bottom">
-                    <p>&copy; {new Date().getFullYear()} RecMedia. All rights reserved.</p>
+                    <p>&copy; {new Date().getFullYear()} RecMedia. {t('footer_rights')}</p>
                 </div>
             </div>
         </footer>

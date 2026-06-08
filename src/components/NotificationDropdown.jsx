@@ -3,7 +3,10 @@ import { Link } from "react-router-dom";
 import { supabase } from "../services/supabase";
 import { motion } from "framer-motion";
 
+import { useLanguage } from "../context/LanguageContext";
+
 const NotificationDropdown = ({ user, onClose, onRead }) => {
+    const { t } = useLanguage();
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
     const dropdownRef = useRef(null);
@@ -101,7 +104,7 @@ const NotificationDropdown = ({ user, onClose, onRead }) => {
             }}
         >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-primary)' }}>Уведомления</h3>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-primary)' }}>{t('notifications_title') || 'Уведомления'}</h3>
                 <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '4px' }}>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -111,9 +114,9 @@ const NotificationDropdown = ({ user, onClose, onRead }) => {
             </div>
 
             {loading ? (
-                <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-secondary)' }}>Загрузка...</div>
+                <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-secondary)' }}>{t('loading') || 'Загрузка...'}</div>
             ) : notifications.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-secondary)' }}>У вас пока нет уведомлений.</div>
+                <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-secondary)' }}>{t('no_notifications') || 'У вас пока нет уведомлений.'}</div>
             ) : (
                 notifications.map(n => (
                     <div key={n.id} style={{ 
@@ -132,9 +135,9 @@ const NotificationDropdown = ({ user, onClose, onRead }) => {
                                     onClick={onClose}
                                     style={{ color: 'var(--accent-light)', textDecoration: 'none', fontWeight: 'bold' }}
                                 >
-                                    {(n.actors?.email && n.actors.email !== 'Unknown' ? n.actors.email.split('@')[0] : 'Пользователь')}
+                                    {(n.actors?.email && n.actors.email !== 'Unknown' ? n.actors.email.split('@')[0] : t('user_unknown') || 'Пользователь')}
                                 </Link> 
-                                {n.type === 'like' ? ' оценил(а) ваш отзыв! ❤️' : ' подписался на вас!'}
+                                {n.type === 'like' ? (t('notif_like') || ' оценил(а) ваш отзыв! ❤️') : (t('notif_follow') || ' подписался на вас!')}
                             </p>
                             <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                                 {new Date(n.created_at).toLocaleString([], {hour: '2-digit', minute:'2-digit', day: '2-digit', month: 'short'})}
