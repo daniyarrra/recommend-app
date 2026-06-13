@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import API from "../../services/api";
 import { useLanguage } from "../../context/LanguageContext";
 import { useCatalog, useInvalidateCatalog } from "../../hooks/useCatalog";
@@ -91,16 +92,25 @@ const AdminContent = () => {
         }
         setAiLoading(true);
         try {
-            const res = await API.post("/admin/ai-fill", { title: form.title_ru, category: form.category });
+            const res = await API.post("/admin/ai-fill", { 
+                title_ru: form.title_ru,
+                title_en: form.title_en,
+                title_kz: form.title_kz,
+                description_ru: form.description_ru,
+                description_en: form.description_en,
+                description_kz: form.description_kz,
+                genre: form.genre,
+                category: form.category 
+            });
             setForm(prev => ({
                 ...prev,
-                title_ru: res.data.title_ru || prev.title_ru,
-                title_en: res.data.title_en || prev.title_en,
-                title_kz: res.data.title_kz || prev.title_kz,
-                genre: res.data.genre || prev.genre,
-                description_ru: res.data.description_ru || prev.description_ru,
-                description_en: res.data.description_en || prev.description_en,
-                description_kz: res.data.description_kz || prev.description_kz,
+                title_ru: res.data.title_ru !== undefined ? res.data.title_ru : prev.title_ru,
+                title_en: res.data.title_en !== undefined ? res.data.title_en : prev.title_en,
+                title_kz: res.data.title_kz !== undefined ? res.data.title_kz : prev.title_kz,
+                genre: res.data.genre !== undefined ? res.data.genre : prev.genre,
+                description_ru: res.data.description_ru !== undefined ? res.data.description_ru : prev.description_ru,
+                description_en: res.data.description_en !== undefined ? res.data.description_en : prev.description_en,
+                description_kz: res.data.description_kz !== undefined ? res.data.description_kz : prev.description_kz,
             }));
         } catch (err) {
             console.error(err);
@@ -145,8 +155,9 @@ const AdminContent = () => {
             setShowModal(false);
             await refreshCatalog();
         } catch (err) {
-            console.error(err);
-            alert(t('admin_save_error'));
+            console.error("Save error:", err);
+            const serverMsg = err?.response?.data?.error;
+            alert(serverMsg ? `${t('admin_save_error')}: ${serverMsg}` : t('admin_save_error'));
         }
         setSaving(false);
     };
@@ -252,7 +263,7 @@ const AdminContent = () => {
             </div>
 
             {/* Create / Edit Modal */}
-            {showModal && (
+            {showModal && createPortal(
                 <div className="admin-modal-overlay" onClick={() => setShowModal(false)}>
                     <div className="admin-modal" onClick={e => e.stopPropagation()}>
                         <h2>{editItem ? t('admin_edit_item') : t('admin_add_item')}</h2>
@@ -430,10 +441,10 @@ const AdminContent = () => {
                         </div>
                     </div>
                 </div>
-            )}
+            , document.body)}
 
             {/* Delete Confirm */}
-            {confirmDelete && (
+            {confirmDelete && createPortal(
                 <div className="admin-modal-overlay" onClick={() => setConfirmDelete(null)}>
                     <div className="admin-modal" onClick={e => e.stopPropagation()}>
                         <h2>{t('admin_confirm_title')}</h2>
@@ -444,7 +455,7 @@ const AdminContent = () => {
                         </div>
                     </div>
                 </div>
-            )}
+            , document.body)}
         </div>
     );
 };
