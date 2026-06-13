@@ -21,7 +21,7 @@ const StarIcon = ({ size = 14 }) => (
 );
 
 const AdminDashboard = () => {
-    const { t, language } = useLanguage();
+    const { t } = useLanguage();
     const navigate = useNavigate();
     const { role } = useOutletContext() || {};
     // Always load in 'ru' — categories are stored in Russian in the DB
