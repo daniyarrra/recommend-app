@@ -1028,7 +1028,6 @@ export const LanguageProvider = ({ children }) => {
     'rnb': { ru: 'R&B', en: 'R&B', kz: 'R&B' },
     'disco': { ru: 'Диско', en: 'Disco', kz: 'Диско' },
     'opera': { ru: 'Опера', en: 'Opera', kz: 'Опера' },
-    'kids': { ru: 'Детская', en: 'Kids', kz: 'Балалар' },
     'children\'s music': { ru: 'Детская музыка', en: "Children's Music", kz: 'Балалар музыкасы' },
     'holiday': { ru: 'Праздничная', en: 'Holiday', kz: 'Мереке' },
     'inspirational': { ru: 'Вдохновляющая', en: 'Inspirational', kz: 'Шабыттандырушы' },
@@ -1082,8 +1081,6 @@ export const LanguageProvider = ({ children }) => {
     // Missing music genres from screenshot
     'indie rock': { ru: 'Инди-рок', en: 'Indie Rock', kz: 'Инди-рок' },
     'soft rock': { ru: 'Мягкий рок', en: 'Soft Rock', kz: 'Жұмсақ рок' },
-    'r&b': { ru: 'R&B', en: 'R&B', kz: 'R&B' },
-    'k-pop': { ru: 'K-Pop', en: 'K-Pop', kz: 'K-Pop' },
     'indie pop': { ru: 'Инди-поп', en: 'Indie Pop', kz: 'Инди-поп' },
     'alt-pop': { ru: 'Альт-поп', en: 'Alt-Pop', kz: 'Альт-поп' },
     'alt rock': { ru: 'Альт-рок', en: 'Alt Rock', kz: 'Альт-рок' },

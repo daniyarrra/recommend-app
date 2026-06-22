@@ -36,7 +36,7 @@ const Register = () => {
     const strengthColors = ["#ef4444", "#f97316", "#eab308", "#22c55e", "#16a34a"];
 
     // Only English letters, digits, and special characters allowed
-    const isLatinOnly = (str) => /^[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~ ]*$/.test(str);
+    const isLatinOnly = (str) => /^[A-Za-z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~ ]*$/.test(str);
 
     const handlePasswordChange = (e) => {
         const val = e.target.value;
