@@ -1,7 +1,7 @@
 /* src/styles/footer.css */
 .footer {
-    margin-top: 60px;
-    padding: 60px 0 20px 0;
+    margin-top: 80px;
+    padding: 64px 0 0 0;
     background: linear-gradient(to bottom, transparent, rgba(6, 8, 15, 0.95) 20%);
     border-top: 1px solid var(--glass-border);
     backdrop-filter: blur(12px);
@@ -22,44 +22,79 @@
 .footer-content {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
-    gap: 100px;
-    margin-bottom: 40px;
+    justify-content: space-between;
+    gap: 48px;
+    padding-bottom: 48px;
 }
 
+/* ── Brand ── */
 .footer-brand {
-    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 280px;
 }
 
 .footer-logo-svg {
-    margin-bottom: 16px;
+    display: block;
 }
 
 .footer-desc {
     color: var(--text-secondary);
-    font-size: 0.9rem;
-    line-height: 1.6;
+    font-size: 1rem;
+    line-height: 1.7;
 }
 
+/* ── Social Icons ── */
+.social-links {
+    display: flex;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+.social-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--hover-bg);
+    color: var(--text-secondary);
+    transition: all 0.25s ease;
+    border: 1px solid var(--glass-border);
+}
+
+.social-icon:hover {
+    background: var(--accent-color);
+    color: white;
+    border-color: transparent;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+}
+
+/* ── Nav Columns ── */
 .footer-links-group {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
+    min-width: 150px;
 }
 
 .footer-heading {
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: var(--text-primary);
-    margin: 0 0 8px 0;
-    letter-spacing: 0.05em;
+    margin: 0 0 4px 0;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
 }
 
 .footer-link {
     color: var(--text-secondary);
     text-decoration: none;
-    font-size: 0.95rem;
+    font-size: 1.05rem;
+    font-weight: 500;
     transition: all 0.2s ease;
     width: fit-content;
 }
@@ -69,57 +104,32 @@
     transform: translateX(4px);
 }
 
-.social-links {
-    display: flex;
-    gap: 16px;
-    margin-top: 4px;
-}
-
-.social-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: var(--hover-bg);
-    color: var(--text-secondary);
-    transition: all 0.3s ease;
-    border: 1px solid var(--glass-border);
-}
-
-.social-icon:hover {
-    background: var(--accent-color);
-    color: white;
-    transform: translateY(-3px);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-}
-
+/* ── Bottom Bar ── */
 .footer-bottom {
-    padding-top: 24px;
+    padding: 20px 0;
     border-top: 1px solid var(--glass-border);
     text-align: center;
     color: var(--text-secondary);
-    font-size: 0.85rem;
+    font-size: 0.9rem;
 }
 
+/* ── Responsive ── */
 @media (max-width: 768px) {
     .footer {
-        margin-top: 32px;
-        padding: 36px 0 20px 0;
+        margin-top: 40px;
+        padding: 40px 0 0 0;
     }
 
     .footer-content {
         flex-direction: column;
         align-items: center;
         text-align: center;
-        gap: 28px;
+        gap: 32px;
     }
 
     .footer-brand {
-        display: flex;
-        flex-direction: column;
         align-items: center;
+        max-width: 100%;
     }
 
     .social-links {
@@ -137,24 +147,24 @@
 
 @media (max-width: 480px) {
     .footer {
-        margin-top: 20px;
-        padding: 28px 0 16px 0;
+        margin-top: 24px;
+        padding: 32px 0 0 0;
     }
 
     .footer-content {
-        gap: 20px;
+        gap: 24px;
     }
 
     .footer-heading {
-        font-size: 0.88rem;
+        font-size: 1rem;
     }
 
     .footer-link {
-        font-size: 0.88rem;
+        font-size: 0.95rem;
     }
 
     .footer-bottom {
-        font-size: 0.78rem;
+        font-size: 0.82rem;
         padding-bottom: 72px;
     }
 }

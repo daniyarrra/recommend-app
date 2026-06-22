@@ -77,6 +77,13 @@ const ItemDetail = () => {
     const [processing, setProcessing] = useState(false);
     const [reviews, setReviews] = useState([]);
     const [reviewsLoading, setReviewsLoading] = useState(true);
+    
+    // Reply system state
+    const [replies, setReplies] = useState({});       // { ratingId: [reply, ...] }
+    const [replyText, setReplyText] = useState({});    // { ratingId: "text" }
+    const [showReplies, setShowReplies] = useState({}); // { ratingId: true/false }
+    const [replyingTo, setReplyingTo] = useState(null); // ratingId currently replying to
+    const [submittingReply, setSubmittingReply] = useState(false);
 
     useEffect(() => {
         const checkWatchlist = async () => {
@@ -136,6 +143,116 @@ const ItemDetail = () => {
             setReviewsLoading(false);
         }
     };
+
+    const fetchReplies = async (ratingId) => {
+        try {
+            const { data, error } = await supabase
+                .from("review_replies")
+                .select(`
+                    id,
+                    text,
+                    created_at,
+                    user_id,
+                    profiles (
+                        email,
+                        avatar_url,
+                        nickname
+                    )
+                `)
+                .eq("rating_id", ratingId)
+                .order("created_at", { ascending: true });
+
+            if (error) throw error;
+            setReplies(prev => ({ ...prev, [ratingId]: data || [] }));
+        } catch (err) {
+            console.error("Error fetching replies:", err);
+        }
+    };
+
+    const toggleReplies = (ratingId) => {
+        const isShowing = !showReplies[ratingId];
+        setShowReplies(prev => ({ ...prev, [ratingId]: isShowing }));
+        if (isShowing && !replies[ratingId]) {
+            fetchReplies(ratingId);
+        }
+    };
+
+    const submitReply = async (ratingId, ownerId) => {
+        const text = (replyText[ratingId] || '').trim();
+        if (!text || !user) return;
+
+        setSubmittingReply(true);
+        try {
+            const { error } = await supabase
+                .from("review_replies")
+                .insert([{ rating_id: ratingId, user_id: user.id, text }]);
+
+            if (error) throw error;
+            
+            // Create notification for the review owner
+            if (ownerId && ownerId !== user.id) {
+                await supabase.from("notifications").insert({
+                    user_id: ownerId,
+                    actor_id: user.id,
+                    type: 'reply',
+                    entity_id: parseInt(id)
+                });
+            }
+
+            setReplyText(prev => ({ ...prev, [ratingId]: '' }));
+            setReplyingTo(null);
+            fetchReplies(ratingId);
+            // Make sure replies are visible
+            setShowReplies(prev => ({ ...prev, [ratingId]: true }));
+        } catch (err) {
+            console.error("Error submitting reply:", err);
+        } finally {
+            setSubmittingReply(false);
+        }
+    };
+
+    const deleteReply = async (replyId, ratingId) => {
+        try {
+            const { error } = await supabase
+                .from("review_replies")
+                .delete()
+                .eq("id", replyId);
+
+            if (error) throw error;
+            fetchReplies(ratingId);
+        } catch (err) {
+            console.error("Error deleting reply:", err);
+        }
+    };
+
+    const deleteReview = async (reviewId) => {
+        if (!window.confirm(t('confirm_delete_review') || "Вы уверены, что хотите удалить этот отзыв?")) return;
+        try {
+            const { error } = await supabase
+                .from("ratings")
+                .delete()
+                .eq("id", reviewId);
+
+            if (error) throw error;
+            fetchReviews();
+        } catch (err) {
+            console.error("Error deleting review:", err);
+        }
+    };
+
+    const ReplyIcon = () => (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="9 17 4 12 9 7"></polyline>
+            <path d="M20 18v-2a4 4 0 0 0-4-4H4"></path>
+        </svg>
+    );
+
+    const TrashIcon = () => (
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        </svg>
+    );
 
     // Presence effect
     useEffect(() => {
@@ -252,7 +369,8 @@ const ItemDetail = () => {
                 </Link>
                 
                 <div className="detail-layout">
-                    <div className="detail-poster-container">
+                    <div className="detail-top-row">
+                        <div className="detail-poster-container">
                         <img src={imageUrl} alt={item.title} className="detail-poster" />
                     </div>
                     
@@ -318,35 +436,9 @@ const ItemDetail = () => {
                             </div>
                         )}
                         
-                        {item.trailer_url && (
-                            <div style={{ marginBottom: '24px' }}>
-                                <p style={{ color: 'var(--text-secondary)', marginBottom: '10px', fontSize: '0.88rem', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <PlayIcon />
-                                    {t('watch_trailer')}
-                                </p>
-                                <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: '12px', background: '#000' }}>
-                                    {item.trailer_url.match(/\.(mp4|m4v)$/i) || item.trailer_url.includes('video-ssl.itunes') ? (
-                                        <video 
-                                            src={item.trailer_url} 
-                                            controls 
-                                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-                                        />
-                                    ) : (
-                                        <iframe 
-                                            src={item.trailer_url} 
-                                            frameBorder="0" 
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                            allowFullScreen
-                                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-                                            title="Trailer"
-                                        ></iframe>
-                                    )}
-                                </div>
-                            </div>
-                        )}
+
                         
                         <div className="detail-actions" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                            <Rating itemId={item.id} onRatingSaved={fetchReviews} />
                             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                                 <button 
                                     className="btn-watchlist" 
@@ -404,10 +496,43 @@ const ItemDetail = () => {
                             </div>
                         </div>
                     </div>
+                    </div>
+
+                    {/* Trailer and Review form are now INSIDE detail-layout but at the bottom */}
+                    {item.trailer_url && (
+                        <div style={{ marginTop: '0', marginBottom: '10px', width: '100%' }}>
+                            <p style={{ color: 'var(--text-secondary)', marginBottom: '16px', fontSize: '1rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <PlayIcon />
+                                {t('watch_trailer')}
+                            </p>
+                            <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: '16px', background: '#000', boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }}>
+                                {item.trailer_url.match(/\.(mp4|m4v)$/i) || item.trailer_url.includes('video-ssl.itunes') ? (
+                                    <video 
+                                        src={item.trailer_url} 
+                                        controls 
+                                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                                    />
+                                ) : (
+                                    <iframe 
+                                        src={item.trailer_url} 
+                                        frameBorder="0" 
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                        allowFullScreen
+                                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                                        title="Trailer"
+                                    ></iframe>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    <div style={{ marginTop: '10px', width: '100%' }}>
+                        <Rating itemId={item.id} onRatingSaved={fetchReviews} />
+                    </div>
                 </div>
 
-                {/* Блок отзывов */}
-                <div className="reviews-section">
+                {/* Блок отзывов (список) */}
+                <div className="reviews-section" style={{ marginTop: '40px' }}>
                     <h2 className="reviews-title">
                         <ChatIcon />
                         {t('user_reviews')}
@@ -430,21 +555,172 @@ const ItemDetail = () => {
                                                 {rev.profiles?.nickname || rev.profiles?.email?.split('@')[0]}
                                             </span>
                                         </Link>
-                                        <div className="review-stars">
-                                            {[1,2,3,4,5].map(star => (
-                                                <StarIcon key={star} filled={star <= rev.rating} size={16} />
-                                            ))}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                            <div className="review-stars">
+                                                {[1,2,3,4,5].map(star => (
+                                                    <StarIcon key={star} filled={star <= rev.rating} size={16} />
+                                                ))}
+                                            </div>
+                                            {user && user.id === rev.user_id && (
+                                                <button 
+                                                    onClick={() => deleteReview(rev.id)}
+                                                    style={{ 
+                                                        background: 'none', border: 'none', 
+                                                        color: 'var(--text-secondary)', cursor: 'pointer',
+                                                        padding: '4px', borderRadius: '4px', display: 'flex',
+                                                        opacity: 0.5, transition: 'all 0.2s'
+                                                    }}
+                                                    onMouseOver={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'; }}
+                                                    onMouseOut={e => { e.currentTarget.style.opacity = '0.5'; e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'none'; }}
+                                                    title={t('delete') || 'Удалить'}
+                                                >
+                                                    <TrashIcon />
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                     <p className="review-text">
                                         "{rev.review}"
                                     </p>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px', borderTop: '1px solid var(--glass-border)', paddingTop: '12px' }}>
-                                        <LikeButton ratingId={rev.id} ownerId={rev.user_id} currentUser={user} />
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                            <LikeButton ratingId={rev.id} ownerId={rev.user_id} currentUser={user} />
+                                            <button 
+                                                onClick={() => setReplyingTo(replyingTo === rev.id ? null : rev.id)}
+                                                className="reply-btn"
+                                                style={{ 
+                                                    display: 'flex', alignItems: 'center', gap: '5px', 
+                                                    background: 'none', border: 'none', 
+                                                    color: 'var(--text-secondary)', cursor: 'pointer', 
+                                                    fontSize: '0.85rem', fontWeight: '500',
+                                                    padding: '4px 8px', borderRadius: '8px',
+                                                    transition: 'all 0.2s ease'
+                                                }}
+                                                onMouseOver={e => e.currentTarget.style.color = 'var(--accent-light)'}
+                                                onMouseOut={e => e.currentTarget.style.color = 'var(--text-secondary)'}
+                                            >
+                                                <ReplyIcon />
+                                                {t('reply') || 'Ответить'}
+                                            </button>
+                                            <button 
+                                                onClick={() => toggleReplies(rev.id)}
+                                                style={{ 
+                                                    display: 'flex', alignItems: 'center', gap: '4px', 
+                                                    background: 'none', border: 'none', 
+                                                    color: 'var(--accent-light)', cursor: 'pointer', 
+                                                    fontSize: '0.82rem', fontWeight: '500',
+                                                    padding: '4px 8px', borderRadius: '8px',
+                                                    opacity: 0.8
+                                                }}
+                                            >
+                                                <ChatIcon />
+                                                {replies[rev.id]?.length > 0 
+                                                    ? `${replies[rev.id].length} ${t('replies_count') || 'ответов'}` 
+                                                    : (showReplies[rev.id] ? (t('hide_replies') || 'Скрыть') : (t('show_replies') || 'Ответы'))
+                                                }
+                                            </button>
+                                        </div>
                                         <div className="review-date">
                                             {new Date(rev.created_at).toLocaleDateString()}
                                         </div>
                                     </div>
+
+                                    {/* Reply Input */}
+                                    {replyingTo === rev.id && (
+                                        <div style={{ 
+                                            marginTop: '12px', display: 'flex', gap: '10px', 
+                                            alignItems: 'flex-start', padding: '12px',
+                                            background: 'rgba(255,255,255,0.02)', borderRadius: '12px',
+                                            border: '1px solid var(--glass-border)'
+                                        }}>
+                                            <textarea
+                                                value={replyText[rev.id] || ''}
+                                                onChange={(e) => setReplyText(prev => ({ ...prev, [rev.id]: e.target.value }))}
+                                                placeholder={t('write_reply') || 'Напишите ответ...'}
+                                                style={{
+                                                    flex: 1, minHeight: '60px', maxHeight: '120px', resize: 'vertical',
+                                                    background: 'var(--glass-bg)', border: '1px solid var(--glass-border)',
+                                                    borderRadius: '10px', padding: '10px 14px', color: 'var(--text-primary)',
+                                                    fontSize: '0.9rem', fontFamily: 'Inter, sans-serif', outline: 'none',
+                                                    transition: 'border-color 0.2s'
+                                                }}
+                                                onFocus={(e) => e.target.style.borderColor = 'var(--accent-color)'}
+                                                onBlur={(e) => e.target.style.borderColor = 'var(--glass-border)'}
+                                            />
+                                            <button
+                                                onClick={() => submitReply(rev.id, rev.user_id)}
+                                                disabled={submittingReply || !(replyText[rev.id] || '').trim()}
+                                                style={{
+                                                    background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+                                                    color: 'white', border: 'none', borderRadius: '10px',
+                                                    padding: '10px 18px', cursor: 'pointer', fontWeight: '600',
+                                                    fontSize: '0.85rem', whiteSpace: 'nowrap',
+                                                    opacity: submittingReply || !(replyText[rev.id] || '').trim() ? 0.5 : 1,
+                                                    transition: 'opacity 0.2s'
+                                                }}
+                                            >
+                                                {submittingReply ? '...' : (t('send') || 'Отправить')}
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {/* Replies List */}
+                                    {showReplies[rev.id] && replies[rev.id] && replies[rev.id].length > 0 && (
+                                        <div style={{ 
+                                            marginTop: '12px', paddingLeft: '20px', 
+                                            borderLeft: '2px solid rgba(59, 130, 246, 0.2)',
+                                            display: 'flex', flexDirection: 'column', gap: '10px'
+                                        }}>
+                                            {replies[rev.id].map(reply => (
+                                                <div key={reply.id} style={{
+                                                    padding: '10px 14px', 
+                                                    background: 'rgba(255,255,255,0.02)',
+                                                    borderRadius: '10px',
+                                                    border: '1px solid var(--glass-border)'
+                                                }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                                                        <Link to={`/user/${reply.user_id}`} style={{ 
+                                                            display: 'flex', alignItems: 'center', gap: '8px', 
+                                                            textDecoration: 'none' 
+                                                        }}>
+                                                            <img 
+                                                                src={reply.profiles?.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${reply.profiles?.email}&backgroundColor=3b82f6`}
+                                                                alt="User"
+                                                                style={{ width: '26px', height: '26px', borderRadius: '50%', border: '1px solid var(--glass-border)' }}
+                                                            />
+                                                            <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-primary)' }}>
+                                                                {reply.profiles?.nickname || reply.profiles?.email?.split('@')[0]}
+                                                            </span>
+                                                        </Link>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', opacity: 0.5 }}>
+                                                                {new Date(reply.created_at).toLocaleDateString()}
+                                                            </span>
+                                                            {user && user.id === reply.user_id && (
+                                                                <button 
+                                                                    onClick={() => deleteReply(reply.id, rev.id)}
+                                                                    style={{ 
+                                                                        background: 'none', border: 'none', 
+                                                                        color: 'var(--text-secondary)', cursor: 'pointer',
+                                                                        padding: '2px', borderRadius: '4px', display: 'flex',
+                                                                        opacity: 0.5, transition: 'opacity 0.2s'
+                                                                    }}
+                                                                    onMouseOver={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = '#ef4444'; }}
+                                                                    onMouseOut={e => { e.currentTarget.style.opacity = '0.5'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+                                                                    title={t('delete') || 'Удалить'}
+                                                                >
+                                                                    <TrashIcon />
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>
+                                                        {reply.text}
+                                                    </p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>

@@ -431,7 +431,7 @@ const Profile = () => {
             </div>
             
             <div className="profile-content">
-                <div className="profile-tabs" style={{ display: 'flex', overflowX: 'auto', paddingBottom: '10px' }}>
+                <div className="profile-tabs" style={{ paddingBottom: '10px' }}>
                     <button 
                         className={`profile-tab ${activeTab === 'feed' ? 'active' : ''}`}
                         onClick={() => setActiveTab('feed')}

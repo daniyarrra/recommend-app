@@ -43,7 +43,9 @@ const ItemCard = ({ item }) => {
             <div className="card-content">
                 <div className="genre">{parseGenres(item.genre).map(g => translateGenre(g)).join(", ")}</div>
                 <div className="title">{item.title}</div>
-                
+                {item.artist && (
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '2px', opacity: 0.8 }}>{item.artist}</div>
+                )}
                 {item.preview_url && (
                     <div onClick={(e) => e.stopPropagation()} style={{ marginTop: '12px' }}>
                         <AudioPlayer src={item.preview_url} />

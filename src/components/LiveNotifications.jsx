@@ -92,6 +92,10 @@ const LiveNotifications = () => {
                         title = "Новый подписчик!";
                         message = `${actorName} теперь подписан(а) на вас.`;
                         type = "info";
+                    } else if (newNotif.type === 'reply') {
+                        title = "Новый ответ!";
+                        message = `${actorName} ответил(а) на ваш отзыв.`;
+                        type = "info";
                     } else {
                         message = `Событие от ${actorName}`;
                     }
@@ -102,7 +106,7 @@ const LiveNotifications = () => {
                         message,
                         type,
                         onClick: () => {
-                            if (newNotif.type === 'like' && newNotif.entity_id) {
+                            if ((newNotif.type === 'like' || newNotif.type === 'reply') && newNotif.entity_id) {
                                 navigate(`/item/${newNotif.entity_id}`);
                             } else if (newNotif.type === 'follow') {
                                 navigate(`/user/${newNotif.actor_id}`);
@@ -143,7 +147,7 @@ const LiveNotifications = () => {
                         onClick={toast.onClick}
                     >
                         <div className="toast-icon-wrapper">
-                            {toast.type === 'success' ? <HeartIcon /> : toast.type === 'info' && toast.title.includes('подписчик') ? <UserIcon /> : <InfoIcon />}
+                            {toast.type === 'success' ? <HeartIcon /> : toast.title.includes('подписчик') ? <UserIcon /> : <InfoIcon />}
                         </div>
                         <div className="toast-content">
                             <div className="toast-title">{toast.title}</div>

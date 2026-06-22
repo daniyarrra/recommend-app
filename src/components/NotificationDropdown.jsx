@@ -137,7 +137,9 @@ const NotificationDropdown = ({ user, onClose, onRead }) => {
                                 >
                                     {(n.actors?.email && n.actors.email !== 'Unknown' ? n.actors.email.split('@')[0] : t('user_unknown') || 'Пользователь')}
                                 </Link> 
-                                {n.type === 'like' ? (t('notif_like') || ' оценил(а) ваш отзыв! ❤️') : (t('notif_follow') || ' подписался на вас!')}
+                                {n.type === 'like' ? (t('notif_like') || ' оценил(а) ваш отзыв! ❤️') : 
+                                 n.type === 'reply' ? (t('notif_reply') || ' ответил(а) на ваш отзыв 💬') : 
+                                 (t('notif_follow') || ' подписался на вас!')}
                             </p>
                             <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                                 {new Date(n.created_at).toLocaleString([], {hour: '2-digit', minute:'2-digit', day: '2-digit', month: 'short'})}

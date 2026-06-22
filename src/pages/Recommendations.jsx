@@ -33,16 +33,16 @@ const Recommendations = () => {
     const { data: allItems = [], isLoading: catalogLoading } = useCatalog(language);
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        if (catalogLoading) {
-            return;
-        }
+        if (catalogLoading) return;
 
         let isMounted = true;
         setLoading(true);
+        setError(null);
 
-        const fetchSmartRecommendations = async () => {
+        const fetchRecommendations = async () => {
             try {
                 const { data: { session } } = await supabase.auth.getSession();
 
@@ -50,16 +50,10 @@ const Recommendations = () => {
                 let watchlist_titles = [];
 
                 if (session?.user) {
-                    const { data: ratingsData } = await supabase
-                        .from("ratings")
-                        .select("item_id")
-                        .eq("user_id", session.user.id)
-                        .gte("rating", 4);
-
-                    const { data: watchlistData } = await supabase
-                        .from("watchlist")
-                        .select("item_id")
-                        .eq("user_id", session.user.id);
+                    const [{ data: ratingsData }, { data: watchlistData }] = await Promise.all([
+                        supabase.from("ratings").select("item_id").eq("user_id", session.user.id).gte("rating", 4),
+                        supabase.from("watchlist").select("item_id").eq("user_id", session.user.id),
+                    ]);
 
                     if (ratingsData) {
                         liked_titles = ratingsData
@@ -73,24 +67,34 @@ const Recommendations = () => {
                     }
                 }
 
+                let result = [];
+
+                // Try personalized POST if user has taste data
                 if (liked_titles.length > 0 || watchlist_titles.length > 0) {
-                    const res = await API.post(`/recommend?lang=${language}`, {
-                        liked_titles,
-                        watchlist_titles,
-                    });
-                    if (isMounted) setItems(res.data);
-                } else {
-                    const res = await API.get(`/recommend?lang=${language}`);
-                    if (isMounted) setItems(res.data);
+                    try {
+                        const res = await API.post(`/recommend?lang=${language}`, { liked_titles, watchlist_titles });
+                        result = Array.isArray(res.data) ? res.data : [];
+                    } catch {
+                        // POST failed — fall through to GET below
+                    }
                 }
+
+                // Always fallback to GET if POST returned nothing or wasn't called
+                if (result.length === 0) {
+                    const res = await API.get(`/recommend?lang=${language}`);
+                    result = Array.isArray(res.data) ? res.data : [];
+                }
+
+                if (isMounted) setItems(result);
             } catch (err) {
-                console.error("Failed to fetch smart recommendations:", err);
+                console.error("Failed to fetch recommendations:", err);
+                if (isMounted) setError(err.message || "error");
             } finally {
                 if (isMounted) setLoading(false);
             }
         };
 
-        fetchSmartRecommendations();
+        fetchRecommendations();
         return () => { isMounted = false; };
     }, [language, catalogLoading, allItems]);
 
@@ -101,44 +105,49 @@ const Recommendations = () => {
         <PageTransition>
             <div className="container">
                 <div className="page-header">
-                <div className="page-header-icon">
-                    <SparklesIcon />
-                </div>
-                <h1 style={{ background: "linear-gradient(135deg, #60a5fa, #c084fc)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-                    {t('rec_title')}
-                </h1>
-                <p>{t('rec_subtitle')}</p>
-                {isPageLoading && (
-                    <div style={{ marginTop: '20px', display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 16px', background: 'rgba(96, 165, 250, 0.1)', borderRadius: '20px', color: '#60a5fa', fontSize: '0.9rem', fontWeight: '500' }}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation: 'spin 1s linear infinite' }}>
-                            <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-                        </svg>
-                        {t('rec_ai_analyzing')}
+                    <div className="page-header-icon">
+                        <SparklesIcon />
                     </div>
-                )}
-                {!isPageLoading && items.length > 0 && !hasAiReasons && (
-                    <p style={{ marginTop: '16px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                        {t('rec_ai_fallback')}
-                    </p>
-                )}
-            </div>
-
-            {isPageLoading ? (
-                <Carousel>
-                    {[...Array(6)].map((_, i) => <SkeletonCard key={i} />)}
-                </Carousel>
-            ) : items.length > 0 ? (
-                <Carousel>
-                    {items.map(item => (
-                        <ItemCard key={item.id} item={item} />
-                    ))}
-                </Carousel>
-            ) : (
-                <div className="empty-state-container">
-                    <EmptyIcon />
-                    <p className="empty-state-text">{t('no_recs')}</p>
+                    <h1 style={{ background: "linear-gradient(135deg, #60a5fa, #c084fc)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                        {t('rec_title')}
+                    </h1>
+                    <p>{t('rec_subtitle')}</p>
+                    {isPageLoading && (
+                        <div style={{ marginTop: '20px', display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 16px', background: 'rgba(96, 165, 250, 0.1)', borderRadius: '20px', color: '#60a5fa', fontSize: '0.9rem', fontWeight: '500' }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation: 'spin 1s linear infinite' }}>
+                                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                            </svg>
+                            {t('rec_ai_analyzing')}
+                        </div>
+                    )}
+                    {!isPageLoading && items.length > 0 && !hasAiReasons && (
+                        <p style={{ marginTop: '16px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                            {t('rec_ai_fallback')}
+                        </p>
+                    )}
+                    {!isPageLoading && error && items.length === 0 && (
+                        <div style={{ marginTop: '16px', color: '#f87171', fontSize: '0.9rem', padding: '12px 16px', background: 'rgba(248,113,113,0.1)', borderRadius: '12px', border: '1px solid rgba(248,113,113,0.2)' }}>
+                            ⚠️ Не удалось подключиться к серверу. Убедитесь, что бэкенд запущен (python app.py).
+                        </div>
+                    )}
                 </div>
-            )}
+
+                {isPageLoading ? (
+                    <Carousel>
+                        {[...Array(6)].map((_, i) => <SkeletonCard key={i} />)}
+                    </Carousel>
+                ) : items.length > 0 ? (
+                    <Carousel>
+                        {items.map(item => (
+                            <ItemCard key={item.id} item={item} />
+                        ))}
+                    </Carousel>
+                ) : !error ? (
+                    <div className="empty-state-container">
+                        <EmptyIcon />
+                        <p className="empty-state-text">{t('no_recs')}</p>
+                    </div>
+                ) : null}
             </div>
         </PageTransition>
     );

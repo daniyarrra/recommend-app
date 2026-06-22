@@ -6,7 +6,8 @@
 
 .detail-layout {
     display: flex;
-    gap: 44px;
+    flex-direction: column;
+    gap: 40px;
     background: var(--glass-bg);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -27,6 +28,12 @@
     height: 200%;
     background: radial-gradient(circle, rgba(99, 102, 241, 0.04), transparent 70%);
     pointer-events: none;
+}
+
+.detail-top-row {
+    display: flex;
+    gap: 44px;
+    width: 100%;
 }
 
 .detail-poster-container {
@@ -243,6 +250,11 @@
         flex-direction: column;
         padding: 20px;
         border-radius: 18px;
+        gap: 20px;
+    }
+    
+    .detail-top-row {
+        flex-direction: column;
         gap: 20px;
     }
     
