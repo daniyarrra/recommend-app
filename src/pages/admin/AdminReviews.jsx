@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { supabase } from "../../services/supabase";
 import { useLanguage } from "../../context/LanguageContext";
 import { useCatalog } from "../../hooks/useCatalog";
@@ -196,7 +197,7 @@ const AdminReviews = () => {
             </div>
 
             {/* Delete Confirm */}
-            {confirmDelete && (
+            {confirmDelete && createPortal(
                 <div className="admin-modal-overlay" onClick={() => setConfirmDelete(null)}>
                     <div className="admin-modal" onClick={e => e.stopPropagation()}>
                         <h2>{t('admin_confirm_title')}</h2>
@@ -209,7 +210,8 @@ const AdminReviews = () => {
                             <button className="admin-btn admin-btn-danger" onClick={() => handleDelete(confirmDelete)}>{t('delete_btn')}</button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );

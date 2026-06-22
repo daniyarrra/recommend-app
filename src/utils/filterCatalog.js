@@ -136,3 +136,50 @@ export function matchesGenreFilter(item, activeGenre, allGenresLabel = "all", tr
 
     return genres.some((genre) => genre === target || genre.includes(target));
 }
+
+/**
+ * Matches item against MULTIPLE selected genres (OR logic: any match = show).
+ */
+export function matchesMultiGenreFilter(item, activeGenres, translateGenre) {
+    if (!activeGenres || activeGenres.length === 0) return true;
+
+    const itemGenres = parseGenres(item.genre).map(g =>
+        normalizeText(translateGenre ? translateGenre(g) : g)
+    );
+
+    return activeGenres.some(selected => {
+        const target = normalizeText(selected);
+        return itemGenres.some(g => g === target || g.includes(target));
+    });
+}
+
+/**
+ * Sort items by given criteria.
+ * sortBy: 'default' | 'title_asc' | 'title_desc' | 'rating_desc' | 'rating_asc' | 'year_desc' | 'year_asc'
+ */
+export function sortItems(items, sortBy) {
+    if (!sortBy || sortBy === "default") return items;
+
+    const sorted = [...items];
+
+    switch (sortBy) {
+        case "title_asc":
+            return sorted.sort((a, b) =>
+                (a.title || "").localeCompare(b.title || "", undefined, { sensitivity: "base" })
+            );
+        case "title_desc":
+            return sorted.sort((a, b) =>
+                (b.title || "").localeCompare(a.title || "", undefined, { sensitivity: "base" })
+            );
+        case "rating_desc":
+            return sorted.sort((a, b) => (b.avg_rating || 0) - (a.avg_rating || 0));
+        case "rating_asc":
+            return sorted.sort((a, b) => (a.avg_rating || 0) - (b.avg_rating || 0));
+        case "year_desc":
+            return sorted.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+        case "year_asc":
+            return sorted.sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
+        default:
+            return sorted;
+    }
+}

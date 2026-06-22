@@ -52,6 +52,11 @@ const Login = () => {
                         onChange={e => setPassword(e.target.value)} 
                         required
                     />
+                    <div style={{ textAlign: "right", marginTop: "-4px" }}>
+                        <Link to="/forgot-password" className="auth-link" style={{ fontSize: "0.88rem" }}>
+                            {t('forgot_password')}
+                        </Link>
+                    </div>
                     <button type="submit" className="auth-btn" disabled={loading}>
                         {loading ? t('loading_btn') : t('login_btn')}
                     </button>

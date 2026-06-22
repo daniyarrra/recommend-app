@@ -7,6 +7,8 @@ import PageLoader from "./components/PageLoader";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Profile from "./pages/Profile";
 import PublicProfile from "./pages/PublicProfile";
 import Books from "./pages/Books";
@@ -90,6 +92,8 @@ function AppRoutes() {
           <Route path="/music" element={<PageTransition><Music /></PageTransition>} />
           <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
           <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
+          <Route path="/forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
+          <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
           <Route path="/recommend" element={<PageTransition><Recommendations /></PageTransition>} />
           <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
           <Route path="/user/:id" element={<PageTransition><PublicProfile /></PageTransition>} />

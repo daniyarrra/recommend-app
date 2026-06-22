@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { supabase } from "../../services/supabase";
 import { useLanguage } from "../../context/LanguageContext";
@@ -181,7 +182,7 @@ const AdminUsers = () => {
             </div>
 
             {/* Confirmation Modal */}
-            {confirmAction && (
+            {confirmAction && createPortal(
                 <div className="admin-modal-overlay" onClick={() => setConfirmAction(null)}>
                     <div className="admin-modal" onClick={e => e.stopPropagation()}>
                         <h2>{t('admin_confirm_title')}</h2>
@@ -209,7 +210,8 @@ const AdminUsers = () => {
                             </button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );
