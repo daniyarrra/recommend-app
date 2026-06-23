@@ -60,7 +60,7 @@ const ItemCard = ({ item }) => {
                 )}
                 
                 <div style={{ marginTop: 'auto', paddingTop: '16px' }} onClick={(e) => e.stopPropagation()}>
-                    <Rating itemId={item.id} />
+                    <Rating itemId={item.id} readOnly={true} />
                 </div>
             </div>
         </motion.div>
